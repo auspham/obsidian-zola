@@ -1,0 +1,570 @@
+* {
+	min-width: 0;
+}
+
+/* 1. Modern Standard (Firefox & Latest Chromium) */
+html {
+	--sb-thumb: #ccc;
+}
+
+html {
+	scrollbar-width: thin;
+	scrollbar-color: var(--sb-thumb) transparent;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent; /* Makes the track invisible */
+}
+
+:root::-webkit-scrollbar-thumb {
+	background-color: var(--sb-thumb);
+	border-radius: 20px;
+	border: 2px solid transparent;
+}
+
+.collapsible-section{
+	position: relative;
+	display: flex;
+	align-items: center;
+	height: 32px;
+	gap: 0.25rem;
+	padding: 2px 0;
+
+	&.open {
+		display: flex;
+	}
+}
+
+.collapsible-section:hover {
+	cursor: pointer;
+	color: $primary;
+}
+
+// Use SVG chevron instead of content::before
+.collapsible-section:before {
+	content: none;
+}
+
+.nav-folder-collapse {
+	transition: transform 0.15s ease;
+	flex-shrink: 0;
+	color: #ababab;
+}
+
+.collapsible-section.open .nav-folder-collapse {
+	transform: rotate(90deg);
+}
+
+.dark .nav-folder-collapse {
+	color: #666;
+}
+
+/* Style the collapsible content. Note: hidden by default */
+.docs-links .collapsible-wrapper {
+	overflow: hidden;
+	transition: height 0.5s ease-out;
+}
+
+.collapsible-wrapper {
+	display: none;
+	padding-left: 12px;
+	margin-left: 6px;
+	border-left: 1px solid #e3e3e3;
+
+	&.open {
+		display: flex;
+	}
+
+	.dark & {
+		border-left: 1px solid #363636;
+	}
+
+	& code {
+		background: transparent!important;
+	}
+}
+
+img {
+	width: 100%;
+	display: block;
+}
+
+
+.excalidraw-preview {
+	color: #000;
+	display: flex;
+	overflow: hidden;
+	position: relative;
+	width: 100%;
+	min-height: 700px;
+	justify-content: center;
+	align-items: center;
+}
+
+/* Excalidraw Canvas Viewer */
+.ec-wrapper {
+	position: relative;
+	width: 100%;
+	height: 700px;
+	overflow: hidden;
+	border-radius: 12px;
+	border: 1px solid #e0e0e0;
+	margin: 1.5rem 0;
+	cursor: grab;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+.ec-grid {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+.ec-svg-layer {
+	position: absolute;
+	top: 0;
+	left: 0;
+	transform-origin: 0 0;
+	pointer-events: none;
+
+	svg {
+		display: block;
+	}
+}
+
+.ec-controls {
+	position: absolute;
+	bottom: 16px;
+	right: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	z-index: 10;
+}
+
+.ec-btn {
+	width: 32px;
+	height: 32px;
+	border: 1px solid #d0d0d0;
+	border-radius: 6px;
+	background: rgba(255, 255, 255, 0.9);
+	color: #555;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	transition: background 0.15s, color 0.15s;
+	backdrop-filter: blur(4px);
+
+	&:hover {
+		background: #fff;
+		color: #111;
+		border-color: #999;
+	}
+}
+
+.ec-zoom-label {
+	position: absolute;
+	bottom: 16px;
+	left: 16px;
+	font-size: 12px;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	color: #888;
+	background: rgba(255, 255, 255, 0.85);
+	padding: 2px 8px;
+	border-radius: 4px;
+	pointer-events: none;
+	backdrop-filter: blur(4px);
+	z-index: 10;
+}
+
+/* Dark mode overrides */
+body.dark {
+	.ec-wrapper {
+		border-color: #333;
+	}
+	.ec-btn {
+		background: rgba(40, 40, 40, 0.9);
+		border-color: #444;
+		color: #aaa;
+
+		&:hover {
+			background: #333;
+			color: #eee;
+			border-color: #666;
+		}
+	}
+	.ec-zoom-label {
+		color: #777;
+		background: rgba(30, 30, 30, 0.85);
+	}
+}
+
+li.nav-item {
+	margin-bottom: 0;
+}
+
+.docs-graph {
+	border-radius: 8px;
+	border: 1px solid #e3e3e3;
+	overflow: hidden;
+	height: 100%;
+	grid-area: footer;
+	position: relative;
+
+	.dark & {
+		border-color: #363636;
+	}
+}
+.docs-toc {
+	flex: 1 1 200px;
+	grid-area: right;
+	position: sticky;
+	justify-self: end;
+}
+
+.page-links {
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	display: grid;
+	grid-template-rows: 2fr 1fr;
+	grid-template-areas: "header" "footer";
+	padding: 0 1rem 1rem;
+	overflow: hidden;
+
+	& > * {
+		min-width: 0;
+	}
+}
+
+.docs-content > h1:nth-child(1) {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+
+.docs-link {
+	display: flex!important;
+	justify-content: space-between;
+	align-items: center;
+}
+
+
+.page-links > div:nth-child(1) {
+	height: 100%;
+	grid-area: header;
+	overflow: auto;
+
+	& > h3 {
+		position: sticky;
+		top: 0;
+		background: #fff;
+		font-size: 11px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: #707070;
+	}
+}
+
+.dark .page-links > div:nth-child(1) > h3 {
+	background: #1e1e1e;
+	color: #999;
+}
+
+.main-grid {
+	display: grid;
+	grid-template-columns: auto minmax(500px, 1fr) minmax(auto, 300px);
+	grid-template-areas: "left mid right";
+	grid-gap: 4rem;
+	max-width: 100vw;
+
+	@include media-breakpoint-down(xxl) {
+		grid-template-columns: auto 1fr;
+		grid-template-areas: "left mid";
+		grid-gap: 2rem;
+	}
+	@include media-breakpoint-down(lg) {
+		grid-template-rows: min-content min-content;
+		grid-template-columns: 1fr;
+		grid-template-areas: "mid" "left";
+	}
+}
+
+.docs-links {
+	width: 100%;
+	padding: 0 1rem;
+}
+
+
+.collapsible-wrapper ul,ol,li {
+	margin-bottom: 0;
+	width: 100%;
+}
+
+.collapsible-wrapper li {
+	margin-top: 0.1rem;
+	margin-bottom: 0.1rem;
+}
+
+.docs-content {
+	& ul, & ol, & li {
+		margin: 1rem 0;
+		word-wrap: break-word;
+	}
+}
+
+/* Base Styles for all Callouts — Obsidian Publish palette */
+.callout {
+  border-left: 4px solid #ababab;
+  background-color: rgba(171, 171, 171, 0.08);
+  padding: 0.5rem 1.25rem;
+  border-radius: 0 4px 4px 0;
+  font-style: initial;
+  .dark & {
+	background-color: rgba(255, 255, 255, 0.04) !important;
+  }
+}
+
+.callout-title {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Note — Blue */
+.callout-note {
+  border-left-color: #086ddd !important;
+  background-color: rgba(8, 109, 221, 0.08);
+}
+.callout-note .callout-title { color: #086ddd; }
+.dark .callout-note { background-color: rgba(2, 122, 255, 0.08) !important; }
+.dark .callout-note .callout-title { color: #027aff; }
+
+/* Warning — Orange */
+.callout-warning {
+  border-left-color: #ec7500 !important;
+  background-color: rgba(236, 117, 0, 0.08);
+}
+.callout-warning .callout-title { color: #ec7500; }
+.dark .callout-warning { background-color: rgba(233, 151, 63, 0.08) !important; }
+.dark .callout-warning .callout-title { color: #e9973f; }
+
+/* Danger — Red */
+.callout-danger {
+  border-left-color: #e93147 !important;
+  background-color: rgba(233, 49, 71, 0.08);
+}
+.callout-danger .callout-title { color: #e93147; }
+.dark .callout-danger { background-color: rgba(251, 70, 76, 0.08) !important; }
+.dark .callout-danger .callout-title { color: #fb464c; }
+
+/* Important — Purple */
+.callout-important {
+  border-left-color: #7852ee !important;
+  background-color: rgba(120, 82, 238, 0.08);
+}
+.callout-important .callout-title { color: #7852ee; }
+.dark .callout-important { background-color: rgba(168, 130, 255, 0.08) !important; }
+.dark .callout-important .callout-title { color: #a882ff; }
+
+/* Tip — Green */
+.callout-tip {
+  border-left-color: #08b94e !important;
+  background-color: rgba(8, 185, 78, 0.08);
+}
+.callout-tip .callout-title { color: #08b94e; }
+.dark .callout-tip { background-color: rgba(68, 207, 110, 0.08) !important; }
+.dark .callout-tip .callout-title { color: #44cf6e; }
+
+.page-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: #222222;
+  margin: 0;
+
+  .dark & {
+	color: #dadada;
+  }
+}
+
+#graph {
+	width: 100%;
+	height: 100%;
+	opacity: 0; /* Hidden until ready */
+    transition: opacity 0.5s ease;
+}
+
+#graph-loader {
+	position: absolute;
+	top: 50%; left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+
+pre.language-mermaid {
+	// display: none;
+	color: transparent;
+	animation: pulse-flash 1.5s infinite ease-in-out;
+	background-color: #fafafa!important;
+
+	& code span {
+		color: transparent;
+		background: #f6f6f6;
+		border-radius: 7px;
+		line-height: 1.8rem;
+	}
+}
+.dark pre.language-mermaid {
+	background: #262626!important;
+	& code span {
+		background: #2a2a2a;
+	}
+}
+
+.mermaid.is-loading {
+    background: rgba(0, 0, 0, 0.03); /* Subtle placeholder box */
+    border-radius: 8px;
+}
+
+.mermaid {
+    position: relative;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease-in-out;
+}
+
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.mermaid {
+    width: 100% !important;
+    max-width: 100vw !important; /* Force it to stay within the viewport width */
+    overflow-x: hidden !important; 
+    display: block !important;
+}
+
+.mermaid svg {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+	max-height: 1000px;
+}
+
+pre {
+	word-wrap: break-word;
+	word-break: break-all;
+	white-space: pre;
+}
+
+@keyframes pulse-flash {
+    0% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.3;
+    }
+}
+
+
+@include media-breakpoint-down(md) {
+    table {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 100%; 
+        overflow: hidden; 
+
+        & thead, & tbody {
+            display: flex;
+            flex-direction: column;
+            width: 0; 
+            min-width: 100%; 
+            flex: 1;
+        }
+
+        & tr {
+            display: flex;
+            width: 0;
+            min-width: 100%; 
+            flex: 1;
+
+            th, td {
+                display: block;
+                flex: 1;
+                width: 0; 
+                min-width: 0; 
+                
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+    }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+
+.docs-content, .preview {
+	h1:not(.page-title) {
+		font-size: 2rem;
+	}
+
+	h2 {
+		font-size: 1.5rem;
+	}
+
+	h3 {
+		font-size: 1.25rem;
+	}
+
+	h4 {
+		font-size: 1.125rem;
+	}
+
+	h5, h6 {
+		font-size: 1rem;
+	}
+}
+
+.dark {
+	.docs-content, .preview {
+		strong {
+			color: #B16286
+		}
+
+		h1:not(.page-title) {
+			color: #458588;
+		}
+
+		h2 {
+			color: #D79921;
+		}
+
+		h3 {
+			color: #689D6A;
+		}
+	}
+}

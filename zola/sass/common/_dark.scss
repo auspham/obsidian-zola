@@ -1,20 +1,14 @@
-/** Theme variables */
+/** Theme variables — Obsidian Publish dark mode */
 
-// Source: https://material.io/design/color/dark-theme.html
+$body-bg-dark: #1e1e1e;
+$body-overlay-dark: #212121;
+$border-dark: #2a2a2a;
+$body-color-dark: #dadada;
+$dots-dark: #3f3f3f;
 
-$body-bg-dark: $gray-900;
-$body-overlay-dark: darken($body-bg-dark, 2.5%);
-$border-dark: darken($body-bg-dark, 2.5%);
-$body-color-dark: $gray-300;
-$dots-dark: darken($body-color-dark, 50%);
-
-$link-color-dark: $blue-300;
+$link-color-dark: #a882ff;
 $button-color-dark: $link-color-dark;
 $focus-color-dark: lighten($link-color-dark, 2.5%);
-
-$navbar-dark-color: $body-color-dark;
-$navbar-dark-hover-color: $link-color-dark;
-$navbar-dark-active-color: $link-color-dark;
 
 /** Theme styles */
 
@@ -33,56 +27,16 @@ body.dark a.text-body {
 
 body.dark .btn-primary {
 	@include button-variant($button-color-dark, $button-color-dark);
-
 	color: $body-bg-dark !important;
 }
 
 body.dark .btn-outline-primary {
 	@include button-outline-variant($button-color-dark, $button-color-dark);
-
 	color: $link-color-dark;
 }
 
 body.dark .btn-outline-primary:hover {
 	color: $body-bg-dark;
-}
-
-body.dark .navbar {
-	background: $body-bg-dark;
-	opacity: 0.975;
-	border-bottom: 1px solid $border-dark;
-}
-
-body.dark.home .navbar {
-	border-bottom: 0;
-}
-
-body.dark .navbar-light .navbar-brand {
-	color: $navbar-dark-color !important;
-}
-
-body.dark .navbar-light .navbar-nav .nav-link {
-	color: $navbar-dark-color;
-}
-
-body.dark .navbar-light .navbar-nav .nav-link:hover,
-body.dark .navbar-light .navbar-nav .nav-link:focus {
-	color: $navbar-dark-hover-color;
-}
-
-body.dark .navbar-light .navbar-nav .nav-link.disabled {
-	color: $navbar-dark-disabled-color;
-}
-
-body.dark .navbar-light .navbar-nav .show > .nav-link,
-body.dark .navbar-light .navbar-nav .active > .nav-link,
-body.dark .navbar-light .navbar-nav .nav-link.show,
-body.dark .navbar-light .navbar-nav .nav-link.active {
-	color: $navbar-dark-active-color;
-}
-
-body.dark .navbar-light .navbar-text {
-	color: $navbar-dark-color;
 }
 
 body.dark .alert-primary a {
@@ -114,22 +68,13 @@ body.dark .page-links a:hover {
 	color: $link-color-dark;
 }
 
-body.dark .navbar-light .navbar-text a {
-	color: $navbar-dark-active-color;
+body.dark .page-links a.active {
+	color: $link-color-dark;
 }
 
 body.dark .docs-links h3.sidebar-link a,
 body.dark .page-links h3.sidebar-link a {
 	color: $body-color-dark;
-}
-
-body.dark .navbar-light .navbar-text a:hover,
-body.dark .navbar-light .navbar-text a:focus {
-	color: $navbar-dark-active-color;
-}
-
-body.dark .navbar .btn-link {
-	color: $navbar-dark-color;
 }
 
 body.dark .content .btn-link {
@@ -140,32 +85,14 @@ body.dark .content .btn-link:hover {
 	color: $link-color-dark;
 }
 
-body.dark .navbar .btn-link:hover {
-	color: $navbar-dark-hover-color;
-}
-
-body.dark .navbar .btn-link:active {
-	color: $navbar-dark-active-color;
-}
-
 body.dark .form-control.is-search {
 	background: $body-overlay-dark;
-
-	/*
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-search'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right calc(0.375em + 0.1875rem) center;
-  background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
-  */
-}
-
-body.dark .navbar-form::after {
-	color: $gray-600;
-	border: 1px solid $gray-800;
+	border-color: #363636;
+	color: $body-color-dark;
 }
 
 body.dark .form-control {
-	color: $gray-500;
+	color: #999;
 }
 
 body.dark .form-control:focus {
@@ -179,7 +106,7 @@ body.dark .border-top {
 @include media-breakpoint-up(lg) {
 	body.dark .docs-sidebar {
 		order: 0;
-		border-right: 1px solid $border-dark;
+		border-right: 1px solid #363636;
 	}
 }
 
@@ -192,8 +119,8 @@ body.dark pre code::-webkit-scrollbar-thumb {
 }
 
 body.dark code:not(.hljs) {
-	background: $body-overlay-dark;
-	color: $body-color-dark;
+	background: #262626;
+	color: #dadada;
 }
 
 body.dark pre code:hover {
@@ -206,7 +133,7 @@ body.dark pre code::-webkit-scrollbar-thumb:hover {
 }
 
 body.dark blockquote {
-	border-left: 3px solid $border-dark;
+	border-left: 3px solid #363636;
 }
 
 body.dark .footer {
@@ -216,7 +143,7 @@ body.dark .footer {
 body.dark .docs-links,
 body.dark .docs-toc {
 	scrollbar-width: thin;
-	scrollbar-color: $body-bg-dark $body-bg-dark;
+	scrollbar-color: transparent transparent;
 }
 
 body.dark .docs-links::-webkit-scrollbar,
@@ -231,35 +158,31 @@ body.dark .docs-toc::-webkit-scrollbar-track {
 
 body.dark .docs-links::-webkit-scrollbar-thumb,
 body.dark .docs-toc::-webkit-scrollbar-thumb {
-	background: $body-bg-dark;
+	background: transparent;
 }
 
 body.dark .docs-links:hover,
 body.dark .docs-toc:hover {
-	scrollbar-width: thin;
-	scrollbar-color: $border-dark $body-bg-dark;
+	scrollbar-color: #555 transparent;
 }
 
 body.dark .docs-links:hover::-webkit-scrollbar-thumb,
-body.dark .docs-toc:hover::-webkit-scrollbar-thumb {
-	background: $border-dark;
-}
-
+body.dark .docs-toc:hover::-webkit-scrollbar-thumb,
 body.dark .docs-links::-webkit-scrollbar-thumb:hover,
 body.dark .docs-toc::-webkit-scrollbar-thumb:hover {
-	background: $border-dark;
+	background: #555;
 }
 
 body.dark .docs-links h3:not(:first-child) {
-	border-top: 1px solid $gray-700;
+	border-top: 1px solid #363636;
 }
 
 body.dark a.docs-link {
-	color: $body-color-dark;
+	color: #bababa;
 }
 
 body.dark .page-links li:not(:first-child) {
-	border-top: 1px dashed $border-dark;
+	border-top: none;
 }
 
 body.dark .card {
@@ -269,15 +192,6 @@ body.dark .card {
 
 body.dark .card.bg-light {
 	background: $body-overlay-dark !important;
-}
-
-body.dark .navbar .menu-icon .navicon {
-	background: $navbar-dark-color;
-}
-
-body.dark .navbar .menu-icon .navicon::before,
-body.dark .navbar .menu-icon .navicon::after {
-	background: $navbar-dark-color;
 }
 
 body.dark .logo-light {
@@ -292,12 +206,8 @@ body.dark .bg-light {
 	background: darken($body-bg-dark, 1.5%) !important;
 }
 
-body.dark .bg-dots {
-	background-image: radial-gradient($dots-dark 15%, transparent 15%);
-}
-
 body.dark .text-muted {
-	color: darken($body-color-dark, 7.5%) !important;
+	color: #999 !important;
 }
 
 body.dark .alert-primary {
@@ -330,4 +240,14 @@ body.dark .copy-status:active::after {
 	content: "Copied";
 	display: block;
 	color: $link-color-dark;
+}
+
+body.dark .sidebar-header {
+	border-bottom-color: #363636;
+}
+
+body.dark .sidebar-search .form-control {
+	background: #262626;
+	border-color: #363636;
+	color: $body-color-dark;
 }

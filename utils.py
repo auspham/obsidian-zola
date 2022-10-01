@@ -6,11 +6,15 @@ import shutil
 from dataclasses import dataclass
 from datetime import datetime
 from distutils.util import strtobool
+from fnmatch import fnmatch
 from os import environ
 from pathlib import Path
 from pprint import PrettyPrinter
 from typing import Dict, List, Optional, Tuple, Union
+from unicodedata import category
 from urllib.parse import quote, unquote
+import hashlib
+import colorsys
 
 from slugify import slugify
 
@@ -30,24 +34,21 @@ def slugify_path(path: Union[str, Path], no_suffix: bool) -> Path:
     """Slugifies every component of a path. Note that '../xxx' will get slugified to '/xxx'. Always use absolute paths. `no_suffix=True` when path is URL or directory (slugify everything including extension)."""
 
     path = Path(str(path).lower())
-    if Settings.is_true("SLUGIFY"):
-        if no_suffix:
-            os_path = "/".join(slugify(item) for item in path.parts)
-            name = ""
-            suffix = ""
-        else:
-            os_path = "/".join(slugify(item) for item in str(path.parent).split("/"))
-            name = ".".join(slugify(item) for item in path.stem.split("."))
-            suffix = path.suffix
-
-        if name != "" and suffix != "":
-            return Path(os_path) / f"{name}{suffix}"
-        elif suffix == "":
-            return Path(os_path) / name
-        else:
-            return Path(os_path)
+    if no_suffix:
+        os_path = "/".join(slugify(item) for item in path.parts)
+        name = ""
+        suffix = ""
     else:
-        return path
+        os_path = "/".join(slugify(item) for item in str(path.parent).split("/"))
+        name = ".".join(slugify(item) for item in path.stem.split("."))
+        suffix = path.suffix
+
+    if name != "" and suffix != "":
+        return Path(os_path) / f"{name}{suffix}"
+    elif suffix == "":
+        return Path(os_path) / name
+    else:
+        return Path(os_path)
 
 
 # ---------------------------------------------------------------------------- #
@@ -171,21 +172,17 @@ class DocPath:
         return (
             title
             if (title != "" and title != ".")
-            else Settings.options["ROOT_SECTION_NAME"] or "main"
+            else "main"
         )
 
     @property
     def section_sidebar(self) -> str:
         """Gets the title of the section."""
-        sidebar = str(self.old_rel_path)
-        assert Settings.options["SUBSECTION_SYMBOL"] is not None
-        sidebar = (
-            sidebar.count("/") * Settings.options["SUBSECTION_SYMBOL"]
-        ) + sidebar.split("/")[-1]
+        sidebar = str(self.old_rel_path).split("/")[-1]
         return (
             sidebar
             if (sidebar != "" and sidebar != ".")
-            else Settings.options["ROOT_SECTION_NAME"] or "main"
+            else "main"
         )
 
     def write_to(self, child: str, content: Union[str, List[str]]):
@@ -207,7 +204,7 @@ class DocPath:
         # The replacement might not be necessary, filenames cannot contain double quotes
         title = " ".join(
             [
-                item if item[0].isupper() else item.title()
+                item if item and item[0].isupper() else item.title()
                 for item in self.old_path.stem.split(" ")
             ]
         ).replace('"', r"\"")
@@ -287,52 +284,18 @@ class Settings:
         "SITE_TITLE_TAB": "",
         "LANDING_DESCRIPTION": "I have nothing but intelligence.",
         "LANDING_BUTTON": "Click to steal some👆",
-        "SORT_BY": "title",
         "GANALYTICS": "",
-        "SLUGIFY": "y",
         "HOME_GRAPH": "y",
         "PAGE_GRAPH": "y",
-        "SUBSECTION_SYMBOL": "👉",
         "LOCAL_GRAPH": "",
-        "GRAPH_LINK_REPLACE": "",
         "STRICT_LINE_BREAKS": "y",
         "SIDEBAR_COLLAPSED": "",
+        "SKIP_LANDING": "",
+        "SHOW_EXCALIDRAW_LABEL": "y",
+        "HIDE_SIDEBAR_PATTERNS": "assets",
+        "EXCLUDE_PATTERNS": "",
         "FOOTER": "",
-        "ROOT_SECTION_NAME": "main",
-        "GRAPH_OPTIONS": """
-        {
-        	nodes: {
-        		shape: "dot",
-        		color: isDark() ? "#8c8e91" : "#dee2e6",
-        		font: {
-        			face: "Inter",
-        			color: isDark() ? "#c9cdd1" : "#616469",
-        			strokeColor: isDark() ? "#c9cdd1" : "#616469",
-        		},
-        		scaling: {
-        			label: {
-        				enabled: true,
-        			},
-        		},
-        	},
-        	edges: {
-        		color: { inherit: "both" },
-        		width: 0.8,
-        		smooth: {
-        			type: "continuous",
-        		},
-        		hoverWidth: 4,
-        	},
-        	interaction: {
-        		hover: true,
-        	},
-        	height: "100%",
-        	width: "100%",
-        	physics: {
-        		solver: "repulsion",
-        	},
-        }
-        """,
+
     }
 
     @classmethod
@@ -340,6 +303,32 @@ class Settings:
         """Returns whether an option's string value is true."""
         val = cls.options[key]
         return bool(strtobool(val)) if val else False
+
+    @classmethod
+    def _matches_patterns(cls, rel_path: Path, key: str) -> bool:
+        """Returns whether any part of the path matches the comma-separated patterns in the given option."""
+        raw = cls.options.get(key, "")
+        if not raw:
+            return False
+        patterns = [p.strip() for p in raw.split(",") if p.strip()]
+        path_str = str(rel_path)
+        for pattern in patterns:
+            if fnmatch(path_str, pattern):
+                return True
+            for part in rel_path.parts:
+                if fnmatch(part, pattern):
+                    return True
+        return False
+
+    @classmethod
+    def matches_hide_patterns(cls, rel_path: Path) -> bool:
+        """Returns whether a path matches HIDE_SIDEBAR_PATTERNS."""
+        return cls._matches_patterns(rel_path, "HIDE_SIDEBAR_PATTERNS")
+
+    @classmethod
+    def matches_exclude_patterns(cls, rel_path: Path) -> bool:
+        """Returns whether a path matches EXCLUDE_PATTERNS."""
+        return cls._matches_patterns(rel_path, "EXCLUDE_PATTERNS")
 
     @classmethod
     def parse_env(cls):
@@ -378,39 +367,27 @@ class Settings:
 #                                Knowledge Graph                               #
 # ---------------------------------------------------------------------------- #
 
-PASTEL_COLORS = [
-    # First tier
-    "#FFADAD",
-    "#FFD6A5",
-    "#FDFFB6",
-    "#CAFFBF",
-    "#9BF6FF",
-    "#A0C4FF",
-    "#BDB2FF",
-    "#FFC6FF",
-    # Second tier
-    "#FBF8CC",
-    "#FDE4CF",
-    "#FFCFD2",
-    "#F1C0E8",
-    "#CFBAF0",
-    "#A3C4F3",
-    "#90DBF4",
-    "#8EECF5",
-    "#98F5E1",
-    "#B9FBC0",
-    # Third tier
-    "#EAE4E9",
-    "#FFF1E6",
-    "#FDE2E4",
-    "#FAD2E1",
-    "#E2ECE9",
-    "#BEE1E6",
-    "#F0EFEB",
-    "#DFE7FD",
-    "#CDDAFD",
-]
 
+def get_pastel_color(category_string):
+    """
+    Generates a unique, consistent pastel hex color based on a string.
+    """
+    # 1. Create a stable hash of the folder name
+    hash_digest = hashlib.md5(category_string.encode()).hexdigest()
+    
+    # 2. Convert the first few chars of hash to a Hue (0.0 to 1.0)
+    # We use int(hex, 16) to turn hex into a number
+    hue = int(hash_digest[:4], 16) / 65535.0
+    
+    # 3. Set Saturation (0.5 - 0.7) and Lightness (0.8 - 0.9) for Pastels
+    saturation = 0.6 
+    lightness = 0.85
+    
+    # 4. Convert HSL to RGB
+    rgb = colorsys.hls_to_rgb(hue, lightness, saturation)
+    
+    # 5. Convert RGB to Hex string
+    return '#%02x%02x%02x' % (int(rgb[0]*255), int(rgb[1]*255), int(rgb[2]*255))
 
 def parse_graph(nodes: Dict[str, str], edges: List[Tuple[str, str]]):
     """
@@ -431,14 +408,9 @@ def parse_graph(nodes: Dict[str, str], edges: List[Tuple[str, str]]):
         edge_counts[i] += 1
         edge_counts[j] += 1
 
-    # Choose the most connected nodes to be colored
-    top_nodes = {
-        node_url: i
-        for i, (node_url, _) in enumerate(
-            list(sorted(edge_counts.items(), key=lambda k: -k[1]))[: len(PASTEL_COLORS)]
-        )
-    }
-
+    # Node category if more than 2 nested level, take sub folder
+    node_categories = set([ key.split("/")[2 if key.count("/") < 5 else 3] for key in nodes.keys() ])
+    
     # Generate graph data
     graph_info = {
         "nodes": [
@@ -446,7 +418,7 @@ def parse_graph(nodes: Dict[str, str], edges: List[Tuple[str, str]]):
                 "id": node_ids[url],
                 "label": title,
                 "url": url,
-                "color": PASTEL_COLORS[top_nodes[url]] if url in top_nodes else None,
+                "color": get_pastel_color(url.split("/")[-2]),
                 "value": math.log10(edge_counts[url] + 1) + 1,
                 "opacity": 0.1,
             }
@@ -462,13 +434,11 @@ def parse_graph(nodes: Dict[str, str], edges: List[Tuple[str, str]]):
 
     with open(site_dir / "static/js/graph_info.js", "w") as f:
         is_local = "true" if Settings.is_true("LOCAL_GRAPH") else "false"
-        link_replace = "true" if Settings.is_true("GRAPH_LINK_REPLACE") else "false"
         f.write(
             "\n".join(
                 [
                     f"var graph_data={graph_info}",
                     f"var graph_is_local={is_local}",
-                    f"var graph_link_replace={link_replace}",
                 ]
             )
         )

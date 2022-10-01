@@ -27,7 +27,6 @@ h6,
 @include media-breakpoint-up(md) {
   body {
     font-size: $font-size-md;
-    padding-top: 4rem !important;
   }
 
   h1,
@@ -46,8 +45,8 @@ h6,
   }
 }
 
+
 .home h1 {
-  /* font-size: calc(1.375rem + 1.5vw); */
   font-size: calc(1.875rem + 1.5vw);
 }
 
@@ -76,54 +75,145 @@ a.btn:focus {
   padding-bottom: 1rem;
 }
 
-/*
-.section svg {
-  display: inline-block;
-  width: 2rem;
-  height: 2rem;
-  vertical-align: text-top;
-}
-*/
-
 body {
-  padding-top: 3.5625rem;
+  padding-top: 0;
+}
+
+// Container: only keep padding on mobile (where hamburger menu is shown)
+.container {
+  padding-left: 0;
+  padding-right: 0;
+
+  @include media-breakpoint-down(lg) {
+    padding-left: var(--#{$variable-prefix}gutter-x, #{$container-padding-x});
+    padding-right: var(--#{$variable-prefix}gutter-x, #{$container-padding-x});
+  }
 }
 
 .docs-sidebar {
+  grid-area: left;
   order: 2;
 }
 
 @include media-breakpoint-up(lg) {
   .docs-sidebar {
     order: 0;
-    border-right: 1px solid $gray-200;
+    border-right: 1px solid #e3e3e3;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-resize-handle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1px;
+    height: 100%;
+    cursor: col-resize;
+    background: #e3e3e3;
+    transition: opacity 0.15s;
+    opacity: .8;
+    z-index: 1001;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 4px;
+      height: 40px;
+      opacity: 1;
+      border-radius: 50px;
+      background: #ababab;
+    }
+
+    .dark & {
+      background: #363636;
+
+      &::after {
+        background: #555;
+      }
+    }
+
+    &:hover, &.dragging {
+      opacity: 1;
+    }
+  }
+
+  .toc-resize-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 100%;
+    cursor: col-resize;
+    background: #e3e3e3;
+    transition: opacity 0.15s;
+    opacity: .8;
+    z-index: 1001;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 4px;
+      height: 40px;
+      opacity: 1;
+      border-radius: 50px;
+      background: #ababab;
+    }
+
+    .dark & {
+      background: #363636;
+
+      &::after {
+        background: #555;
+      }
+    }
+
+    &:hover, &.dragging {
+      opacity: 1;
+    }
   }
 
   @supports ((position:-webkit-sticky) or (position:sticky)) {
     .docs-sidebar {
       position: -webkit-sticky;
       position: sticky;
-      top: 4rem;
+      top: 0;
       z-index: 1000;
-      height: calc(100vh - 4rem);
+      height: 100vh;
     }
   }
 }
 
 @include media-breakpoint-up(xl) {
   .docs-sidebar {
-    flex: 0 1 320px;
+    min-width: 440px;
   }
 }
 
 .docs-links {
+  width: 100%;
   padding-bottom: 5rem;
+  flex: 1;
+  overflow-y: auto;
+
+  a, div, span, li {
+    white-space: nowrap;
+  }
 }
 
 @include media-breakpoint-up(lg) {
   @supports ((position: -webkit-sticky) or (position: sticky)) {
     .docs-links {
-      max-height: calc(100vh - 4rem);
+      max-height: none;
       overflow-y: scroll;
     }
   }
@@ -146,14 +236,13 @@ body {
   .docs-toc {
     position: -webkit-sticky;
     position: sticky;
-    top: 4rem;
-    height: calc(100vh - 4rem);
-    overflow-y: auto;
+    top: 0;
+    height: 100vh;
   }
 }
 
 .docs-content {
-  padding-bottom: 3rem;
+  padding: 3rem 0;
   order: 1;
 }
 
@@ -167,6 +256,27 @@ body {
   border-top: 1px solid $gray-200;
 }
 
+.docs-navigation,
+.blog-navigation {
+  margin-top:2rem;
+  margin-bottom:2rem;
+  padding-top:2rem
+}
+.docs-navigation a,
+.blog-navigation a {
+  font-size:.9rem
+}
+@media (min-width: 992px) {
+  .docs-navigation,
+  .blog-navigation {
+    margin-bottom: 2rem
+  }
+  .docs-navigation a,
+  .blog-navigation a {
+    font-size:1rem
+  }
+}
+
 @include media-breakpoint-up(lg) {
   .docs-navigation, .blog-navigation {
     a {
@@ -175,18 +285,21 @@ body {
   }
 }
 
-.navbar a:hover,
-.navbar a:focus {
-  text-decoration: none;
-}
-
 #TableOfContents ul {
-  padding-left: 0;
   list-style: none;
+  border-left: 1px solid #e3e3e3;
+
+
+	.dark & {
+		border-left: 1px solid #363636;
+	}
+
+  padding-left: 1rem;
+  height: calc(100%);
 }
 
 ::selection {
-  background: rgba(212, 53, 159, 0.2);
+  background: rgba(124, 92, 191, 0.2);
 }
 
 .bg-dots {
@@ -209,18 +322,6 @@ body {
   margin-top: -12rem;
 }
 
-// https://fossheim.io/writing/posts/css-text-gradient/
-.gradient-text {
-  background-color: $primary;
-  background-image: linear-gradient(90deg, $primary, $blue-300 50%, $pink-500);
-  background-size: 100%;
-  background-repeat: repeat;
-  -webkit-background-clip: text;
-  -moz-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  -moz-text-fill-color: transparent;
-}
-
 .katex {
   font-size: $font-size-md;
 }
@@ -229,4 +330,12 @@ article {
   hr {
     margin: 3rem 0;
   }
+}
+
+ol li, ul li {
+  margin-bottom: 0.5rem;
+}
+
+img {
+  padding: 1rem 0;
 }

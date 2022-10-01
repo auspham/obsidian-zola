@@ -4,34 +4,154 @@
   {% set page_class = "docs single" %}
 {% endblock body %}
 
-{% block header %}
-  {# This value is matched by the config.extra.menu.main~url #}
-  {% set current_section = "docs" %}
-  {{ macros_header::header(current_section=current_section)}}
-{% endblock header %}
-
 {% block content %}
+{% set current_section = "docs" %}
 <div class="wrap container" role="document">
   <div class="content">
-    <div class="row flex-xl-nowrap">
+    <div class="main-grid flex-xl-nowrap">
 	  {{ macros_sidebar::docs_sidebar(current_section=current_section) }}
-	  {{ macros_toc::docs_toc(page=page) }}
-      <main class="docs-content col-lg-11 col-xl-9">
-        <h1>{{ page.title | safe }}</h1>
-        {% if page.extra.lead %}<p class="lead">{{ page.extra.lead | safe }}</p>{% endif %}
-        {{ page.content | safe }}
-        {% if config.extra.edit_page %}
-          {{ macros_edit_page::docs_edit_page(current_path=current_path) }}
-        {% endif %}
-        {% if config.extra.page_graph %}
-          {{ macros_docs_graph::docs_graph(page=page, current_section=current_section) }}
+      <main style="grid-area: mid">
+        <div class="docs-content">
+          <h1 class="page-title">{{ page.title | safe }}</h1>
+          {% if page.extra.lead %}<p class="lead">{{ page.extra.lead | safe }}</p>{% endif %}
+          {{ page.content | safe }}
+<!--
+          {% if page.extra.is_excalidraw == "True" %}
+            <div id="excalidraw-preview">
+              <div id="loading" class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          {% endif %} -->
+
+          {% if config.extra.edit_page %}
+            {{ macros_edit_page::docs_edit_page(current_path=current_path) }}
           {% endif %}
+        </div>
+
+        <div class="docs-navigation d-flex justify-content-between">
+          {% if page.extra.previous.title != "None" %}
+          <a href="{{page.extra.previous.path}}">
+            <div class="card my-1">
+              <div class="card-body py-2">
+                ← {{page.extra.previous.title}}
+              </div>
+              </div>
+          </a>
+          {% endif %}
+          {% if page.extra.next.title != "None" %}
+          <a class="ms-auto" href="{{page.extra.next.path}}">
+            <div class="card my-1">
+              <div class="card-body py-2">
+                {{page.extra.next.title}} →
+              </div>
+            </div>
+          </a>
+          {% endif %}
+        </div>
       </main>
+	  {{ macros_toc::docs_toc(page=page, current_section=current_section) }}
     </div>
   </div>
 </div>
 
 {% if config.extra.page_graph %}
-  {{ macros_graph::graph_js() }}
+  {{ macros_graph::graph_js(force_local="true") }}
 {% endif %}
+
+{% if page.extra.is_excalidraw == "True" %}
+<script src="{{ get_url(path="js/excalidraw-canvas.js") | safe }}"></script>
+<script type="module">
+  import {exportToSvg} from "https://cdn.jsdelivr.net/npm/@excalidraw/excalidraw@0.18.0/+esm";
+
+  const compressedData = "{{ page.extra.excalidraw_data | safe }}".split("||||")
+
+  // Parse data once upfront
+  const parsedData = [];
+  compressedData.forEach((compressed, i) => {
+    try {
+      const decoded = LZString.decompressFromBase64(compressed);
+      parsedData[i] = JSON.parse(decoded);
+    } catch (e) {
+      parsedData[i] = null;
+    }
+  });
+
+  // Track active canvas instances for cleanup on re-render
+  const canvasInstances = [];
+
+  function getAppState(data, isDark) {
+    return isDark
+      ? {
+          viewBackgroundColor: "transparent",
+          exportWithDarkMode: true,
+          exportBackground: false,
+          exportPadding: 100,
+        }
+      : {
+          ...data.appState,
+          theme: "light",
+          viewBackgroundColor: "transparent",
+          exportWithDarkMode: false,
+          exportBackground: false,
+          exportPadding: 100,
+        };
+  }
+
+  async function renderAll() {
+    // Save current view state before destroying
+    const savedStates = canvasInstances.map(c => c.getState());
+
+    // Destroy previous canvas instances
+    canvasInstances.forEach(c => c.destroy());
+    canvasInstances.length = 0;
+
+    const elements = document.querySelectorAll(".excalidraw-preview");
+    const isDark = document.body.classList.contains("dark");
+
+    elements.forEach(async (element, i) => {
+      if (!parsedData[i]) return;
+      try {
+        // Clear previous content (keep loading spinner markup)
+        const wrapper = element.querySelector(".ec-wrapper");
+        if (wrapper) wrapper.remove();
+
+        const svg = await exportToSvg({
+          elements: parsedData[i].elements,
+          appState: getAppState(parsedData[i], isDark),
+          files: parsedData[i].files || {},
+          getDimensions: (width, height) => ({ width: width + 50, height: height + 50 })
+        });
+
+        const loading = element.querySelector('#loading');
+        if (loading) loading.style.display = 'none';
+
+        const canvas = new ExcalidrawCanvas(element, svg);
+        if (savedStates[i]) {
+          canvas.restoreState(savedStates[i]);
+        }
+        canvasInstances.push(canvas);
+
+      } catch (err) {
+        const loading = element.querySelector('#loading');
+        if (loading) loading.innerHTML = `<span style="color:red">Error: ${err.message}</span>`;
+        console.error(err);
+      }
+    });
+  }
+
+  // Initial render
+  renderAll();
+
+  // Re-render when theme changes
+  const themeObserver = new MutationObserver(() => renderAll());
+  themeObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+</script>
+
+{% endif %}
+
+<script type="module">
+</script>
+
 {% endblock content %}

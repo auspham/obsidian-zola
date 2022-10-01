@@ -1,6 +1,5 @@
 {%- import 'macros/head.html' as macros_head -%}
 {% import 'macros/math.html' as macros_math -%}
-{% import 'macros/header.html' as macros_header -%}
 {% import 'macros/footer.html' as macros_footer -%}
 {% import 'macros/javascript.html' as macros_js -%}
 {% import 'macros/page-publish-metadata.html' as macros_publish -%}
@@ -18,6 +17,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 {{ macros_head::resource() }}
 {{ macros_head::stylesheet() }}
+<script src="{{ get_url(path="js/lz-string.min.js") | safe }}" defer></script>
+<script src="{{ get_url(path="js/mermaid.min.js") | safe }}" defer></script>
 
 {% block seo %}
   {% if config.extra.title_separator %}
@@ -32,15 +33,44 @@
 </head>
 {% block body %}{% set page_class="home" %}{% endblock body %}
 <body class="{{ page_class }}">
-  <script>
+  <script data-cfasync="false">
     if (localStorage.getItem("theme") === "dark" || (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
       document.body.classList.add("dark");
     }
+    (function() {
+      var MIN_CONTENT = 400;
+      // Use clientWidth to exclude scrollbar
+      var vw = document.documentElement.clientWidth;
+      // Read computed gap from CSS (runs before grid exists, so estimate with rem)
+      var rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      var GAP = rootFontSize * 4 * 2; // 4rem × 2 gaps
+      var w = localStorage.getItem("sidebar-width");
+      var tw = localStorage.getItem("toc-width");
+      var sw = w ? parseInt(w, 10) : 0;
+      var tocw = tw ? parseInt(tw, 10) : 0;
+      // Clamp so sidebar + toc + content + gaps fit viewport
+      if (sw && tocw && sw + tocw + MIN_CONTENT + GAP > vw) {
+        var avail = vw - MIN_CONTENT - GAP;
+        var ratio = sw / (sw + tocw);
+        sw = Math.max(150, Math.floor(avail * ratio));
+        tocw = Math.max(200, avail - sw);
+      } else if (sw && sw + MIN_CONTENT + GAP > vw) {
+        sw = Math.max(150, vw - MIN_CONTENT - GAP);
+      } else if (tocw && tocw + MIN_CONTENT + GAP > vw) {
+        tocw = Math.max(200, vw - MIN_CONTENT - GAP);
+      }
+      if (sw) {
+        var s = document.createElement("style");
+        s.textContent = ".docs-sidebar{width:" + sw + "px;min-width:" + sw + "px;max-width:" + sw + "px}";
+        document.head.appendChild(s);
+      }
+      if (tocw) {
+        var s2 = document.createElement("style");
+        s2.textContent = ".docs-toc{width:" + tocw + "px;min-width:" + tocw + "px;max-width:" + tocw + "px;flex:none}";
+        document.head.appendChild(s2);
+      }
+    })();
   </script>
-  {% block header %}
-    {{ macros_header::header(current_section="/") }}
-  {% endblock header %}
-
   {% block content %}{% endblock content %}
 
   {{ macros_js::javascript() }}  

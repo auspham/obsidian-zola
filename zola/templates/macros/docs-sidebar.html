@@ -1,63 +1,117 @@
+{% macro render_nested_section(section_obj) %}
+    {% if section_obj.extra.hide_from_sidebar != "True" %}
+        {# Check if the current URL is in this section's pages or subsections #}
+        {% set is_open = false %}
+        {% if current_url %}
+            {% for page in section_obj.pages %}
+                {% if current_url == page.permalink %}{% set_global is_open = true %}{% endif %}
+            {% endfor %}
+            {% if current_url is starting_with(section_obj.permalink) %}{% set_global is_open = true %}{% endif %}
+        {% endif %}
+
+        <div class="collapsible-section{% if is_open %} open{% endif %}">
+            <svg class="nav-folder-collapse" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            <div>{{ section_obj.extra.sidebar | default(value=section_obj.title) | safe }}</div>
+        </div>
+
+        <div class="collapsible-wrapper {% if is_open %}open{% endif %}">
+            <ul class="list-unstyled">
+                {% if section_obj.subsections %}
+                    {% for s in section_obj.subsections %}
+                        {% set sub = get_section(path=s) %}
+                        {% if sub.pages | length > 0 or sub.subsections | length > 0 %}
+                            {{ macros_sidebar::render_nested_section(section_obj=sub) }}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                {% for page in section_obj.pages %}
+                    <li>
+                        <a class="docs-link{% if current_url == page.permalink %} active{% endif %}" href="{{ page.permalink | safe }}">
+                            <span>{{ page.title | safe }}</span>
+							{% if config.extra.show_excalidraw_label and page.extra.is_excalidraw == "True" %} <code> Excalidraw </code> {% endif %}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+{% endmacro %}
+
 {% macro docs_sidebar(current_section) %}
-<div class="col-lg-5 col-xl-4 docs-sidebar">
-	<nav class="docs-links" aria-label="Main navigation">
-			{% set index_path = current_section ~ "/_index.md" | trim_start_matches(pat="/") %}
-			{% set index = get_section(path=index_path) %}
-			{% if index.pages %}
-					<h3 class="collapsible-section">{{ index.title }}</h3>
-					<div class="collapsible-wrapper">
-						<ul class="list-unstyled">
-						{% for page in index.pages %}                           
-								<li><a class="docs-link{% if current_url == page.permalink %} active{% endif %}" href="{{ page.permalink | safe }}">{{ page.title }}</a></li>
-						{% endfor %}
-						</ul>
-					</div>
-			{% endif %}
-			{% if index.subsections %}
-					{% for s in index.subsections %}
-					{% set subsection = get_section(path=s) %}
-					{% if subsection.pages %}
-							<h3 class="collapsible-section">{{ subsection.extra.sidebar | safe }}</h3>
-							<div class="collapsible-wrapper">
-								<ul class="list-unstyled">
-								{% for page in subsection.pages %}                           
-										<li><a class="docs-link{% if current_url == page.permalink %} active{% endif %}" href="{{ page.permalink | safe }}">{{ page.title | safe }}</a></li>
-								{% endfor %}
-								</ul>
-							</div>
-					{% endif %}
-					{% if subsection.subsections %}
-						{% for s in subsection.subsections %}
-						{% set subsubsection = get_section(path=s) %}
-							{% if subsubsection.pages %}
-									<h4 class="collapsible-section">{{ subsubsection.extra.sidebar | safe }}</h4>
-									<div class="collapsible-wrapper">
-										<ul class="list-unstyled">
-										{% for page in subsubsection.pages %}                           
-												<li><a class="docs-link{% if current_url == page.permalink %} active{% endif %}" href="{{ page.permalink | safe }}">{{ page.title | safe }}</a></li>
-										{% endfor %}
-										</ul>
-									</div>
-							{% endif %}
-							{% if subsubsection.subsections %}
-								{% for s in subsubsection.subsections %}
-								{% set subsubsubsection = get_section(path=s) %}
-									{% if subsubsubsection.pages %}
-											<h5 class="collapsible-section">{{ subsubsubsection.extra.sidebar | safe }}</h5>
-											<div class="collapsible-wrapper">
-												<ul class="list-unstyled">
-												{% for page in subsubsubsection.pages %}                           
-														<li><a class="docs-link{% if current_url == page.permalink %} active{% endif %}" href="{{ page.permalink | safe }}">{{ page.title | safe }}</a></li>
-												{% endfor %}
-												</ul>
-											</div>
-									{% endif %}
-								{% endfor %}
-							{% endif %}
-						{% endfor %}
-					{% endif %}
-					{% endfor %}
-			{% endif %}
-	</nav>
+{# Mobile sidebar toggle (hamburger) — must be before .docs-sidebar for CSS ~ combinator #}
+<input class="sidebar-toggle-input" type="checkbox" id="sidebar-toggle">
+<label class="sidebar-toggle-label d-lg-none" for="sidebar-toggle">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+</label>
+
+<div class="docs-sidebar">
+    {# Sidebar header: site name + theme toggle #}
+    <div class="sidebar-header">
+        <a class="sidebar-site-name" href="{{ config.base_url | safe }}">{{ config.title | default(value="obsidian-zola") | safe }}</a>
+        <div style="display: flex">
+            <button id="mode" class="sidebar-theme-toggle" type="button" aria-label="Toggle mode">
+                <span class="toggle-dark"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+                <span class="toggle-light"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>
+            </button>
+            <button class="sidebar-mobile-close d-lg-none" type="button" aria-label="Close menu" onclick="document.getElementById('sidebar-toggle').checked=false">&times;</button>
+        </div>
+    </div>
+
+    {# Sidebar search #}
+    {% if config.build_search_index %}
+    <div class="sidebar-search">
+        <input id="userinput" class="form-control is-search" type="search" placeholder="Search..." aria-label="Search..." autocomplete="off">
+        <div id="suggestions" class="rounded d-none"></div>
+    </div>
+    {% endif %}
+
+    <nav class="docs-links" aria-label="Main navigation">
+        {% set index_path = current_section ~ "/_index.md" | trim_start_matches(pat="/") %}
+        {% set index = get_section(path=index_path) %}
+
+        {% if index.subsections %}
+            {% for s in index.subsections %}
+                {% set sub = get_section(path=s) %}
+                {% if sub.pages | length > 0 or sub.subsections | length > 0 %}
+                    {{ macros_sidebar::render_nested_section(section_obj=sub) }}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        {% if index.pages %}
+            <ul class="list-unstyled">
+                {% for page in index.pages %}
+					<li>
+						<a class="docs-link{% if current_url == page.permalink %} active{% endif %}" href="{{ page.permalink | safe }}">
+							<span>{{ page.title | safe }}</span>
+							{% if config.extra.show_excalidraw_label and page.extra.is_excalidraw == "True" %} <code> Excalidraw </code> {% endif %}
+						</a>
+					</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </nav>
+    <div class="sidebar-resize-handle"></div>
 </div>
+
+<script>
+(function() {
+    var sections = document.querySelectorAll(".collapsible-section");
+    for (var i = 0; i < sections.length; i++) {
+        sections[i].addEventListener("click", function() {
+            this.classList.toggle("open");
+            var wrapper = this.nextElementSibling;
+            if (!wrapper) return;
+            if (wrapper.classList.contains("open")) {
+                wrapper.classList.remove("open");
+                wrapper.style.display = "none";
+            } else {
+                wrapper.classList.add("open");
+                wrapper.style.display = "";
+            }
+        });
+    }
+})();
+</script>
 {% endmacro %}

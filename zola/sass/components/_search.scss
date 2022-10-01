@@ -1,77 +1,114 @@
-.navbar-form {
-  position: relative;
-}
-
+// Obsidian Publish-style search results dropdown
 #suggestions {
   position: absolute;
   right: 0;
-  margin-top: 0.5rem;
-  width: calc(100vw - 3rem);
-  max-height: 500px;
-  overflow: auto;
+  margin-top: 4px;
+  width: 100%;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #e3e3e3;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  z-index: 200;
+  scrollbar-width: thin;
+  scrollbar-color: #d4d4d4 transparent;
+}
+
+#suggestions #loading {
+  display: block;
+  margin: 1.5rem auto;
 }
 
 #suggestions a {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   text-decoration: none;
-  padding: 0.75rem;
-  margin: 0 0.5rem;
+  padding: 8px 12px;
+  transition: background 0.1s;
 }
 
 #suggestions a:focus {
-  background: $gray-100;
+  background: #f6f6f6;
   outline: 0;
 }
 
+#suggestions a:hover {
+  background: #f6f6f6;
+}
+
 #suggestions div:not(:first-child) {
-  border-top: 1px dashed $gray-200;
+  border-top: 1px solid #f0f0f0;
 }
 
 #suggestions div:first-child {
-  margin-top: 0.5rem;
+  margin-top: 0;
 }
 
 #suggestions div:last-child {
-  margin-bottom: 0.5rem;
-}
-
-#suggestions a:hover {
-  background: $gray-100;
+  margin-bottom: 0;
 }
 
 #suggestions span {
-  // display: flex;
-  font-size: $font-size-base;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 #suggestions span:first-child {
-  font-weight: $headings-font-weight;
-  color: $black;
+  font-weight: 600;
+  color: #222;
+  font-size: 14px;
 }
 
 #suggestions span:nth-child(2) {
-  color: $gray-700;
+  color: #707070;
+  font-size: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// Dark mode search results
+body.dark #suggestions {
+  background: #262626;
+  border-color: #363636;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  scrollbar-color: #555 transparent;
+}
+
+body.dark #suggestions a:hover,
+body.dark #suggestions a:focus {
+  background: #333;
+}
+
+body.dark #suggestions div:not(:first-child) {
+  border-top-color: #363636;
+}
+
+body.dark #suggestions span:first-child {
+  color: #dadada;
+}
+
+body.dark #suggestions span:nth-child(2) {
+  color: #999;
+}
+
+body.dark #suggestions mark {
+  background: rgba(168, 130, 255, 0.25);
+  color: #dadada;
+}
+
+#suggestions mark {
+  background: rgba(124, 92, 191, 0.15);
+  color: #222;
+  border-radius: 2px;
+  padding: 0 1px;
 }
 
 @include media-breakpoint-up(sm) {
   #suggestions {
-    width: 30rem;
-  }
-
-  #suggestions a {
-    display: flex;
-  }
-
-  #suggestions span:first-child {
-    width: 9rem;
-    padding-right: 1rem;
-    border-right: 1px solid $gray-200;
-    display: inline-block;
-    text-align: right;
-  }
-
-  #suggestions span:nth-child(2) {
-    width: 19rem;
-    padding-left: 1rem;
+    width: 100%;
   }
 }

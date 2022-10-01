@@ -22,6 +22,9 @@
 
 {% block content %}
 
+{% if config.extra.skip_landing %}
+<script>window.location.replace("{{ get_url(path=section.extra.url | default(value="/")) | safe }}");</script>
+{% else %}
 <div class="home">
   <div class="home-background">
     <div class="wrap container" role="document">
@@ -42,7 +45,15 @@
   </div>
 
 {% if config.extra.home_graph %}
-  <div id="graph"></div>
+<div class="graph">
+  <div id="graph-loader">
+      <div class="spinner-border text-info" role="status">
+      </div>
+  </div>
+  <div id="graph" class="graph">
+  </div>
+</div>
+
 {% endif %}
 
 </div>
@@ -53,6 +64,18 @@
 
 {% if config.extra.home_graph %}
   {{ macros_graph::graph_js() }}
-{% endif %}
 
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      graph.once("afterDrawing", function () {
+        graph.fit({
+            animation: false,
+        });
+      });
+
+    }, false);
+  </script>
+{% endif %}
+{% endif %}
 {% endblock content %}

@@ -1,6 +1,6 @@
 ---
 title: "___LANDING_TITLE___"
-sort_by: "___SORT_BY___"
+sort_by: "weight"
 
 extra:
   lead: "___LANDING_DESCRIPTION___"

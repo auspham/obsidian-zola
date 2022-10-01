@@ -4,13 +4,8 @@
   {% set page_class = "docs list" %}
 {% endblock body %}
 
-{% block header %}
-  {# This value is matched by the config.extra.menu.main~section #}
-  {% set current_section = "docs" %}
-  {{ macros_header::header(current_section=current_section)}}
-{% endblock header %}
-
 {% block content %}
+{% set current_section = "docs" %}
 <div class="wrap container" role="document">
   <div class="content">
     <div class="row justify-content-center">

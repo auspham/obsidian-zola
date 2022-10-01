@@ -68,36 +68,52 @@ Source:
   - https://github.com/getzola/zola/blob/master/docs/static/search.js
 */
 (function(){
-  var index = elasticlunr.Index.load(window.searchIndex);
-  userinput.addEventListener('input', show_results, true);
+  var index = null;
+  var debounceTimer;
+  var loadingHTML = "<div id='loading' class='spinner-border text-primary' role='status'><span class='visually-hidden'>Loading...</span></div>";
+  userinput.addEventListener('input', function() {
+    var self = this;
+    clearTimeout(debounceTimer);
+    suggestions.innerHTML = loadingHTML;
+    suggestions.classList.remove('d-none');
+    debounceTimer = setTimeout(function() {
+      show_results.call(self);
+    }, 250);
+  }, true);
   suggestions.addEventListener('click', accept_suggestion, true);
   
   function show_results(){
     var value = this.value.trim();
+    if (!value) {
+      suggestions.innerHTML = '';
+      suggestions.classList.add('d-none');
+      return;
+    }
+    if (!index) {
+      index = elasticlunr.Index.load(window.searchIndex);
+    }
     var options = {
-      bool: "OR",
+      bool: "AND",
       fields: {
         title: {boost: 2, expand: true},
-        body: {boost: 1, expand: true},
-        expand: true
+        body: {boost: 1},
       }
     };
-    var results = index.search(value, options);
+    var results = index.search(value, options).slice(0, 10);
 
-    var entry, childs = suggestions.childNodes;
-    var i = 0, len = results.length;
     var items = value.split(/\s+/);
+    suggestions.innerHTML = '';
     suggestions.classList.remove('d-none');
 
     results.forEach(function(page) {
       if (page.doc.body !== '') {
-        entry = document.createElement('div');
+        var entry = document.createElement('div');
 
         entry.innerHTML = '<a href><span></span><span></span></a>';
   
-        a = entry.querySelector('a'),
-        t = entry.querySelector('span:first-child'),
-        d = entry.querySelector('span:nth-child(2)');
+        var a = entry.querySelector('a'),
+            t = entry.querySelector('span:first-child'),
+            d = entry.querySelector('span:nth-child(2)');
         a.href = page.ref;
         t.textContent = page.doc.title;
         d.innerHTML = makeTeaser(page.doc.body, items);
@@ -105,10 +121,6 @@ Source:
         suggestions.appendChild(entry);
       }
     });
-
-    while(childs.length > len){
-        suggestions.removeChild(childs[i])
-    }
 
   }
 
@@ -137,6 +149,11 @@ Source:
     var NORMAL_WORD_WEIGHT = 2;
     var FIRST_WORD_WEIGHT = 8;
     var TEASER_MAX_WORDS = 30;
+
+    // Truncate body to avoid processing huge documents
+    if (body.length > 5000) {
+      body = body.substring(0, 5000);
+    }
   
     var stemmedTerms = terms.map(function (w) {
       return elasticlunr.stemmer(w.toLowerCase());

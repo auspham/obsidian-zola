@@ -8,13 +8,17 @@ samp {
 }
 
 code {
-  padding: 0.25rem 0.5rem;
+  padding: 0.2rem 0.4rem;
+  background: #f6f6f6;
+  border-radius: 4px;
+  color: inherit;
 }
 
 pre {
-  background: $beige;
+  background: #f6f6f6;
   color: $black;
-  margin: 2rem 0;
+  margin: 1.5rem 0;
+  border-radius: 6px;
 }
 
 pre code {
@@ -25,6 +29,7 @@ pre code {
   tab-size: 4;
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
+  background: transparent;
 }
 
 .hljs {
@@ -40,7 +45,7 @@ pre code {
   }
 
   pre {
-    margin: 2rem -1.5rem;
+    margin: 1.5rem -1.5rem;
   }
 }
 
@@ -49,14 +54,14 @@ pre code::-webkit-scrollbar {
 }
 
 pre code::-webkit-scrollbar-thumb {
-  background: $gray-200;
+  background: #d4d4d4;
 }
 
 pre code:hover {
   scrollbar-width: thin;
-  scrollbar-color: $gray-200 transparent;
+  scrollbar-color: #d4d4d4 transparent;
 }
 
 pre code::-webkit-scrollbar-thumb:hover {
-  background: $gray-200;
+  background: #ababab;
 }

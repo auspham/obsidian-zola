@@ -1,26 +1,18 @@
-// Color system
+// Color system — Obsidian Publish palette
 
 $white:    #fff;
-$gray-100: #f8f9fa;
-$gray-200: #e9ecef;
-$gray-300: #dee2e6;
-$gray-400: #ced4da;
-$gray-500: #adb5bd;
-$gray-600: #6c757d;
-$gray-700: #495057;
-$gray-800: #343a40;
-$gray-900: #212529;
-$black:    #000;
-
-$yellow:   #ffe000;
-$black:    #1d2d35;
-$beige:    #fbf7f0;
-// $red:      #e55235;
-$purple:   #5d2f86;
-$brown:    #aa9c84;
-
-$blue-300: #8ed6fb;
-$pink-500: #d32e9d;
+$gray-100: #fafafa;
+$gray-200: #f6f6f6;
+$gray-300: #e3e3e3;
+$gray-400: #e0e0e0;
+$gray-500: #d4d4d4;
+$gray-600: #ababab;
+$gray-700: #707070;
+$gray-800: #5a5a5a;
+$gray-900: #222222;
+$black:    #222222;
+$beige:    #f6f6f6;
+$purple:   #7c5cbf;
 
 $primary: $purple;
 
@@ -47,12 +39,6 @@ $enable-important-utilities:  true;
 $navbar-dark-toggler-icon-bg: none;
 $navbar-light-toggler-icon-bg: none;
 
-// Options
-//
-// Quickly modify global styling by enabling or disabling optional features.
-
-// $enable-responsive-font-sizes: true;
-
 // Body
 //
 // Settings for the `<body>` element.
@@ -72,11 +58,11 @@ $link-decoration:                         none;
 // Define the maximum width of `.container` for different screen sizes.
 
 $container-max-widths: (
-  sm: 540px, // original after 576: 540px
-  md: 720px, // original after 768: 720px
-  lg: 960px, // original after 992: 960px
-  xl: 1140px, // original after 1200: 1140px
-  xxl: 1500px // original after 1400: 1320px
+  sm: 100%, // original after 576: 540px
+  md: 100%, // original after 768: 720px
+  lg: 100%, // original after 992: 960px
+  xl: 100%, // original after 1200: 1140px
+  xxl: 100% // original after 1400: 1320px
 );
 
 @include _assert-ascending($container-max-widths, "$container-max-widths");
@@ -93,14 +79,14 @@ $grid-row-columns:            6;
 //
 // Define common padding and border radius sizes and more.
 
-$border-color:                $gray-200;
+$border-color:                $gray-300;
 
 // Typography
 //
 // Font, line-height, and color for body text, headings, and more.
 
 // stylelint-disable value-keyword-case
-$font-family-sans-serif:      "Inter", -apple-system, blinkmacsystemfont, "Segoe UI", roboto, "Helvetica Neue", arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+$font-family-sans-serif:      "Atkinson Hyperlegible", -apple-system, blinkmacsystemfont, "Segoe UI", roboto, "Helvetica Neue", arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 $font-family-monospace:       "Fira Code", sfmono-regular, menlo, monaco, consolas, "Liberation Mono", "Courier New", monospace;
 $font-family-base:            $font-family-sans-serif;
 // stylelint-enable value-keyword-case
@@ -139,7 +125,7 @@ $navbar-light-active-color:         $primary;
 
 // Cards
 
-$card-border-color:                 $gray-200;
+$card-border-color:                 $gray-300;
 
 // Alerts
 //

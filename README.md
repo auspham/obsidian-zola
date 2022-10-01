@@ -1,135 +1,59 @@
-<p align="center">
-  <img height="200" src="icon.png">
-</p>
 
-# obsidian-zola
+# Obsidian-Zola-Publish
 
-![](https://img.shields.io/github/v/release/ppeetteerrs/obsidian-zola)
-![](https://img.shields.io/github/issues-closed-raw/ppeetteerrs/obsidian-zola)
-![](https://img.shields.io/badge/dynamic/json?color=blueviolet&label=today%27s%20views&query=%24.datasets%5B1%5D.values%5B%28%40.length-1%29%5D&url=https%3A%2F%2Fyhype.me%2Fapi%2Fchart%2Frepository_views_count_chart_controller%3FrepositoryNodeId%3DR_kgDOGpHp4A)
+A free alternative to [Obsidian Publish](https://obsidian.md/publish). Converts your Obsidian vault into a static site using [Zola](https://www.getzola.org/) and deploys to [Netlify](https://www.netlify.com/).
 
-A free (but better?) alternative to Obsidian Publish.
+**Live demo:** [https://swe.auspham.dev/](https://swe.auspham.dev/)
 
-> This repo contains an easy-to-use (read: simplistic) solution for converting an Obsidian Personal Knowledge Management System (read: bunch of random Markdowns) into a Zola site.
+**Feature demo:** [Java Concurrency in Practice — Chapter 05](https://swe.auspham.dev/docs/java-concurrency-in-practice/chapter-05-building-block/) (showcases callouts, code blocks, navigation, TOC, and graph)
 
-Credits: This repo was forked from [Adidoks](https://github.com/aaranxu/adidoks).
+## Features
 
-Special Thanks: Wikilink parsing is powered by [obsidian-export](https://github.com/zoni/obsidian-export).
+- Obsidian Publish-style theme (dark/light mode)
+- Knowledge graph (global + per-page)
+- Nested folder structure with collapsible sidebar
+- Docs navigation (previous/next)
+- Nested page preview on hover
+- [Excalidraw](https://github.com/zsviczian/obsidian-excalidraw-plugin) rendering with drag/zoom
+- Native Obsidian callout support
+- Mermaid diagram support
+- Full-text search
+- Table of contents with scroll-spy
+- Resizable sidebar and TOC panels
 
-# Announcements
+## Setup
 
-**v1.3.0 Satisfying Feature Requests! ✨**
+**Step 1:** Turn your Obsidian vault into a Git repository and create a Netlify site pointing to it.
 
-Bug Fixes:
+**Step 2:** Create a `netlify.toml` in your vault root. Copy from [`netlify.example.toml`](netlify.example.toml) and fill in the required values (`SITE_URL`, `REPO_URL`, `LANDING_PAGE`).
 
-- Fixed some more bugs related to unconventional filenames (e.g. containing "." and other special characters)
+**Step 3:** Push your changes. Netlify will build and publish your vault automatically.
+
+See [CONFIG.md](CONFIG.md) for detailed descriptions of every option.
 
 
-Improvements:
+# Question
+Check [FAQs](CONFIG.md#faqs) or post in [Discussions](https://github.com/auspham/obsidian-zola/discussions)
 
-- Better local test setup (see `Local Testing` below)
-- Configurable root section name
-- Configurable footer content
+## Excalidraw
 
-# Setup
+To render Excalidraw diagrams on your site, the [Obsidian Excalidraw plugin](https://github.com/zsviczian/obsidian-excalidraw-plugin) must be configured to export as SVG:
 
-**Step 1: Setup Netlify**
+1. Open Obsidian Settings > Excalidraw
+2. Under **Embedding Excalidraw into your Notes and Exporting**, set the export format to **SVG Image**
 
-- Turn your Obsidian vault folder into a Git repository
-- Create a Netlify site pointing to that Git repository
+## Local Testing
 
-**Step 2: Edit `netlify.toml`**
+1. Install [Zola](https://www.getzola.org/documentation/getting-started/installation/)
+2. Install Python dependencies: `pip install python-slugify rtoml natsort`
+3. Clone this repo somewhere outside your vault
+4. Set the vault path via a `.vault_path` file or the `$VAULT` environment variable
+5. Run `./local-run.sh`
 
-- Create `netlify.toml` in your Obsidian vault folder
-- Copy the content from `netlify.example.toml` in this repo and replace the appropriate settings (`SITE_URL`, `REPO_URL` and `LANDING_PAGE` cannot be left empty). 
+## Acknowledgements
 
-**Step 3: You're Done 🎉!**
+Forked from [ppeetteerrs/obsidian-zola](https://github.com/ppeetteerrs/obsidian-zola). Wikilink parsing powered by [obsidian-export](https://github.com/zoni/obsidian-export). Thanks to [@DoNotResuscitate](https://github.com/DoNotResuscitate/) for finding and fixing nested folder bugs.
 
-- Push your changes and get ready to become famous!
-- Be Fancy: All text field settings in `netlify.toml` (e.g. `LANDING_TITLE`) supports HTML syntax. And I added `Animate.css` + `Hover.css` + `CSShake` for those of you who want to add a personal touch~ 
+## Disclaimer
 
-**Step 4: Issues & Feature Requests**
-
-- If you encounter any issues, first refer to [Config+FAQ](https://github.com/ppeetteerrs/obsidian-zola/blob/main/CONFIG.md). If still unsolved, just post in the `Issues` tab. It would be good to include a copy of the error log found in the Netlify panel if the issue is related to deployment.
-- If you have any feature request, do post an issue also. However, please this repo is intended as a one-file setup. Advanced features / detailed configurability will not be supported unless it is wanted by most users. However, I can provide help for you to implement a fork that suits your needs 🥂.
-
-**Step 5: (Optional Enhancement) Auto Sitemap Submit**
-
-To make your site more friendly to search engines, you can add a netlify plugin to automatically submit the new sitemap everytime you re-deploy the site. Just add the following to your `netlify.toml`. Remember to replace `baseUrl` with your `SITE_URL`.
-
-```toml
-[[plugins]]
-package = "netlify-plugin-submit-sitemap"
-
-[plugins.inputs]
-
-# The base url of your site (optional, default = main URL set in Netlify)
-baseUrl = "https://peteryuen.netlify.app/"
-
-# Path to the sitemap URL (optional, default = /sitemap.xml)
-sitemapPath = "/sitemap.xml"
-
-# Time in seconds to not submit the sitemap after successful submission
-ignorePeriod = 0
-
-# Enabled providers to submit sitemap to (optional, default = 'google', 'bing', 'yandex'). Possible providers are currently only 'google', 'bing', 'yandex'.
-providers = [
-  "google",
-  "bing",
-  "yandex",
-]
-```
-
-# Example Site
-
-> Do not copy `netlify.toml` from example site, it is unstable. Please reference from `netlify.example.toml`.
-
-The [example site](https://peteryuen.netlify.app/) shows the capabilities of `obsidian-zola`. Note that the example site uses the `dev` branch of `obsidian-zola`. If you see features that are available in the example site but are not available in the main branch yet, consider trying out the `dev` (unstable) branch. Exact method can be referenced from the [example repo's](https://github.com/ppeetteerrs/obsidian-pkm) `netlify.toml`.
-
-# Local Testing (Ubuntu) [thanks @trwbox]
-
-- Install zola from the instuctions on the site `https://www.getzola.org/documentation/getting-started/installation/`
-- Run the following commands to install other needed dependencies `sudo apt install python-is-python3 python3-pip` and `pip3 install python-slugify rtoml` (or use `conda` / `mamba`)
-- Use `git clone https://github.com/ppeetteerrs/obsidian-zola` to clone the repo to somewhere other than inside the Obsidian vault folder
-- Set the path to the Obsisian vault using a `.vault_path` file or the `$VAULT` environment variable
-- use `./local-run.sh` to run the site
-
-# Features 
-
-**Disclaimer**
-
-> This tool is made for people who use Obsidian as a simple and efficient note-taking app (or PKM). If you configured your Obsidian with plenty of fancy shortcodes, plugins and Obsidian-specific syntax, this tool would not (and does not intend) to support those features.
-
-**Supported**
-- Knowledge graph (you can also treat it as backlinks)
-- LaTEX (powered by `KaTEX`, bye MathJAX fans 👋)
-- Partial string search (powered by `elasticlunr`)
-- Syntax highlighting + Fira Code!
-- Customizable animations
-- Navigation
-- Table of content
-- Typical Markdown syntax
-- Strikethroughs
-- Tables
-- Single-line footnotes (i.e. `[^1]` in the paragraph and `[^1]: xxx` later)
-- Checkboxes
-- Link escaping pattern: `[Slides Demo](<Slides Demo>)`
-
-**Unsupported**
-
-- Non-image / note embeds (e.g. videos, audio, PDF). They will be turned into links.
-- Image resizing
-- Highlighting text
-- Comments
-- Inline / Multi-line footnotes
-- Mermaid Diagrams
-
-# Gotchas
-1. Do not have files with name `index.md` or `_index.md`
-2. ~~Do not have files that have the same name as its subfolder (e.g. having both `.../category1.md` and `.../category1/xxx.md` is not allowed)~~ (Fixed)
-3. `LANDING_PAGE` needs to be set to the slugified file name if `SLUGIFY` is turned on (e.g. to use `I am Home.md`, `LANDING_PAGE` needs to be `i-am-home`)
-
-# WIPs / Ideas
-- (Probably will do) Backlinks / Mentioned in
-- (Maybe) Lottie animations?
-- (Dunno) Configurable collapse icon
+This software is provided "as is" without warranty of any kind (see [LICENSE](LICENSE)). This is a community-driven project — it is not actively maintained and there is no guarantee of ongoing support or issue resolution. Bug fixes and improvements rely on community contributions. Pull requests are welcome.

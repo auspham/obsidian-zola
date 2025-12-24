@@ -14,6 +14,28 @@ Live: [https://swe.auspham.dev/](https://swe.auspham.dev/)
 ![nestedfolder](README.asset/nestedFolder.png) ![nestedTree](README.asset/nestedpreview_tree.png)
 
 
+4. Obsidian Excalidraw (https://github.com/zsviczian/obsidian-excalidraw-plugin) supported with rendering, drag/zoom diagram
+
+![alt text](README.asset/excalidraw.png)
+
+File that's excalidraw will be noted in the file tree
+
+![alt text](README.asset/excalidraw-filetree.png)
+
+
+5. Native obsidian allout support
+
+![alt text](README.asset/callout.png)
+
+![alt text](README.asset/callout-dark.png)
+
+
+6. Mermaid support
+
+![alt text](README.asset/mermaid.png)
+
+> [!NOTE]
+> Example page that has all these features: https://swe.auspham.dev/docs/java-concurrency-in-practice/chapter-05-building-block/
 
 # If you're using this fork:
 
@@ -47,8 +69,10 @@ SITE_TITLE_TAB = ""
 SITE_URL = "https://swe.auspham.dev/"
 # (Optional) Site Timezone
 TIMEZONE = "Australia/Melbourne"
+GITHUB_LINK = "https://github.com/auspham/obsidian-zola"
+HOMEPAGE_URL = "https://auspham.dev"
 ZOLA_VERSION = "0.15.2"
-# IMPORTANT
+# (Optional, default title) How to sort notes inside each section on the right sidebar ("date" or "title"). Subsections on side bar are sorted by title, the sort order cannot be changed.
 SORT_BY = "weight"
 # (Optional) Google Analytics Measurement ID
 GANALYTICS = ""
@@ -64,7 +88,7 @@ SIDEBAR_COLLAPSED = "true"
 FOOTER = ""
 # (Optional, default main) Root section name.
 ROOT_SECTION_NAME = "main"
-# IMPORTANT
+# (Optional) visjs graph options. Can remove if desired.
 GRAPH_OPTIONS = """
         {
 			autoResize: true,
@@ -102,7 +126,5 @@ GRAPH_OPTIONS = """
         	},
         }
         """
-
-
 
 ```

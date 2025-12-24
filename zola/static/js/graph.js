@@ -75,6 +75,28 @@ if (curr_node) {
 
 // Construct graph
 var options = ___GRAPH_OPTIONS___;
+options = {
+    ...options,
+    physics: {
+        stabilization: false,
+        solver: "forceAtlas2Based",
+        forceAtlas2Based: {
+            gravitationalConstant: -50,
+            centralGravity: 0.01,
+            springConstant: 0.08,
+            springLength: 100,
+            damping: 0.4,
+            avoidOverlap: 0      // SET TO 0 for speed. Only use > 0 if nodes are overlapping.
+        },
+        maxVelocity: 200,
+        stabilization: {
+            enabled: true,
+            iterations: 100,
+            onlyDynamicEdges: false,
+            fit: true
+        }
+    },
+}
 
 var graph = new vis.Network(
     container,
@@ -82,7 +104,7 @@ var graph = new vis.Network(
         nodes: nodes,
         edges: edges,
     },
-    options
+    options, 
 );
 
 // Clickable URL
@@ -116,4 +138,12 @@ graph.once("afterDrawing", function () {
             scale: graph.getScale() * 0.9,
         });
     }
+});
+
+
+graph.once("stabilizationIterationsDone", function() {
+    const graph = document.querySelector('#graph');
+    const loader = document.querySelector("#graph-loader");
+    loader.style.display = "none";
+    graph.style.opacity = 1;
 });

@@ -13,6 +13,10 @@ from utils import (
     write_settings,
 )
 
+EXCALIDRAW_START = "````compressed-json"
+EXCALIDRAW_END = "````"
+EXCALIDRAW_END_SYMBOL = "%%"
+EXCALIDRAW_SEPERATOR = "||||"
 
 def sortFiles(path: Path):
     posix_path = path.as_posix().casefold()
@@ -44,16 +48,52 @@ if __name__ == "__main__":
                 nodes[doc_path.abs_url] = doc_path.page_title
                 content = doc_path.content
                 parsed_lines: List[str] = []
-                for line in content:
+                is_excalidraw = False
+                excalidraw_data = []
+                j = 0
+                while j < len(content):
+                    line = content[j]
+
                     parsed_line, linked = DocLink.parse(line, doc_path)
 
                     # Fix LaTEX new lines
                     parsed_line = re.sub(r"\\\\\s*$", r"\\\\\\\\", parsed_line)
 
-                    parsed_lines.append(parsed_line)
-
                     edges.extend([doc_path.edge(rel_path) for rel_path in linked])
                     
+                    if "EXCALIDRAW VIEW" in line:
+                        is_excalidraw = True
+                        parsed_lines.append(f"<div class='excalidraw-preview' id='excalidraw-{j}'><div id='loading' class='spinner-border text-primary' role='status'><span class='visually-hidden'>Loading...</span></div></div>")
+                        parsed_lines.append("\n") # Empty line for markdown properly render
+                    
+                        # We close on the second "%%"
+                        end_excalidraw_symbol_count = 2
+                        
+                        if excalidraw_data:
+                            # Previous excalidraw data is there, append the separator
+                            excalidraw_data.append(EXCALIDRAW_SEPERATOR)
+
+                        while j < len(content):
+                            line: str = content[j]
+                            if EXCALIDRAW_START in line:
+                                j += 1 # Skip the EXCALIDRAW_START line
+                                while j < len(content):
+                                    line = content[j]
+                                    if EXCALIDRAW_END in line and EXCALIDRAW_START not in line:
+                                        break
+                                    excalidraw_data.append(line.strip())
+                                    j += 1
+                            
+                            if EXCALIDRAW_END_SYMBOL in line:
+                                end_excalidraw_symbol_count -= 1
+
+                            j += 1
+                            if end_excalidraw_symbol_count == 0:
+                                break
+                    else:
+                        parsed_lines.append(parsed_line)
+                        j += 1
+
                 previous_md = {
                     'title': None,
                     'path': None
@@ -95,16 +135,22 @@ if __name__ == "__main__":
                     "template: docs/page.html",
                     f"weight: {section_count}",
                     "extra:",
-                    f"    previous:",
+                    f"     previous:",
                     f"         title: {previous_md['title']}",
                     f"         path: {previous_md['path']}",
-                    f"    next:",
+                    f"     next:",
                     f"         title: {next_md['title']}",
                     f"         path: {next_md['path']}",
+                    f"     is_excalidraw: {is_excalidraw}",
+                    f"     excalidraw_data: {''.join(excalidraw_data)}",
                     "---",
                     # To add last line-break
                     "",
                 ]
+                
+                # if is_excalidraw:
+                #     parsed_lines = []
+                
                 doc_path.write(["\n".join(content), *parsed_lines])
                 print(f"Found page: {doc_path.new_rel_path}, doc_path.abs: {doc_path.abs_url}, path: {path}")
             else:

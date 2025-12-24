@@ -3,6 +3,26 @@ function isDark() {
     return document.body.classList.contains("dark");
 }
 
+async function updateMermaidTheme(newTheme) {
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: newTheme,
+    responsive: true,
+  });
+
+  const diagrams = document.querySelectorAll('.mermaid');
+
+  for (const diagram of diagrams) {
+    const originalCode = diagram.getAttribute('data-original-code');
+    diagram.innerHTML = originalCode;
+    diagram.removeAttribute('data-processed');
+  }
+
+  await mermaid.run({
+    nodes: document.querySelectorAll('.mermaid'),
+  });
+}
+
 document.getElementById("mode").addEventListener("click", () => {
     document.body.classList.toggle("dark");
 
@@ -20,7 +40,10 @@ document.getElementById("mode").addEventListener("click", () => {
             },
         });
     }
+
+    updateMermaidTheme(isDark() ? "dark": "default")
 });
+
 
 // Collapsible sidebar code (it's ugly but I don't care)
 var sections = $(".collapsible-section");
@@ -80,3 +103,43 @@ for (let i = 0; i < sections.length; i++) {
         }
     });
 }
+
+
+document.querySelectorAll('blockquote').forEach(bq => {
+  const content = bq.innerHTML.trim();
+  
+  const match = content.match(/^(?:<p>)?\[!(\w+)\]/i);
+
+  if (match) {
+    const type = match[1].toLowerCase();
+    bq.classList.add('callout', `callout-${type}`);
+    bq.innerHTML = content.replace(/^(?:<p>)?\[!(\w+)\](?:<br>)?/, 
+      `<div class="callout-title">${type}</div><p>`);
+  }
+});
+
+
+window.addEventListener('load', () => {
+    const sidebar = document.querySelector('.docs-links'); 
+    if (!sidebar) return;
+
+    const activeLink = sidebar.querySelector('.list-unstyled .active');
+    if (activeLink) {
+        const targetScrollPos = activeLink.offsetTop - (sidebar.clientHeight / 2);
+        sidebar.scrollTo({
+            top: targetScrollPos,
+            behavior: 'smooth'
+        });
+    }
+});
+
+
+document.querySelectorAll('table').forEach(table => {
+  // Create the wrapper element
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('table-container');
+  
+  // Insert the wrapper before the table and move the table inside it
+  table.parentNode.insertBefore(wrapper, table);
+  wrapper.appendChild(table);
+});

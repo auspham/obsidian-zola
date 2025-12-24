@@ -13,14 +13,22 @@
 {% block content %}
 <div class="wrap container" role="document">
   <div class="content">
-    <div class="row flex-xl-nowrap">
+    <div class="main-grid flex-xl-nowrap">
 	  {{ macros_sidebar::docs_sidebar(current_section=current_section) }}
-	  {{ macros_toc::docs_toc(page=page) }}
-      <main class="col-lg-11 col-xl-9">
+      <main style="grid-area: mid">
         <div class="docs-content">
-          <h1>{{ page.title | safe }}</h1>
+          <h1 class="page-title">{{ page.title | safe }}</h1>
           {% if page.extra.lead %}<p class="lead">{{ page.extra.lead | safe }}</p>{% endif %}
           {{ page.content | safe }}
+<!-- 
+          {% if page.extra.is_excalidraw == "True" %}
+            <div id="excalidraw-preview">
+              <div id="loading" class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          {% endif %} -->
+
           {% if config.extra.edit_page %}
             {{ macros_edit_page::docs_edit_page(current_path=current_path) }}
           {% endif %}
@@ -46,17 +54,111 @@
           </a>
           {% endif %}
         </div>
-
-        {% if config.extra.page_graph %}
-          {{ macros_docs_graph::docs_graph(page=page, current_section=current_section) }}
-        {% endif %}
       </main>
+	  {{ macros_toc::docs_toc(page=page, current_section=current_section) }}
     </div>
-
   </div>
 </div>
 
 {% if config.extra.page_graph %}
   {{ macros_graph::graph_js() }}
 {% endif %}
+
+{% if page.extra.is_excalidraw == "True" %}
+<script type="module">
+  import {exportToSvg} from "https://esm.sh/@excalidraw/utils/es2022/utils.mjs";
+
+  const compressedData = "{{ page.extra.excalidraw_data | safe }}".split("||||")
+
+  async function init() {
+      document.querySelectorAll(".excalidraw-preview").forEach(async (element, i) => {
+        try {
+          const decoded = LZString.decompressFromBase64(compressedData[i]);
+          const data = JSON.parse(decoded);
+
+          const svg = await exportToSvg({
+              elements: data.elements,
+              appState: {
+                  ...data.appState,
+                  exportWithDarkMode: false,
+                  exportBackground: true,
+                  exportPadding: 100,
+              },
+              files: data.files || {},
+              getDimensions: (width, height) => ({ width: width + 50, height: height + 50 })
+          });
+
+
+          svg.id = `excalidraw-svg-${i}`
+
+          svg.removeAttribute("width");
+          svg.removeAttribute("height");
+
+          svg.style.width = "100%";
+          svg.style.height = "800px";
+          svg.style.display = "block";
+
+          element.querySelector('#loading').style.display = 'none';
+          element.appendChild(svg);
+
+          const panzoom = svgPanZoom(`#${svg.id}`, {
+              zoomScaleSensitivity: 0.5,
+              contain: true,
+              dblClickZoomEnabled: false,
+              controlIconsEnabled: true
+          })
+
+          window.addEventListener('resize', function() {
+              panzoom.resize();
+              panzoom.fit();
+              panzoom.center();
+          });
+        } catch (err) {
+            document.getElementById('loading').innerHTML = 
+                `<span style="color:red">Error: ${err.message}</span>`;
+            console.error(err);
+        }
+      })
+  }
+
+  
+  init();
+
+</script>
+
+{% endif %}
+
+<script type="module">
+  const blocks = document.querySelectorAll('pre code.language-mermaid');
+
+  mermaid.initialize({ 
+    startOnLoad: false,
+    useMaxWidth: false,
+    theme: isDark() ? "dark": "default"
+  });
+
+  blocks.forEach(async (block, i) => {
+    const rawCode = block.textContent.trim()
+    const pre = block.parentElement;
+    const container = document.createElement('div');
+    container.className = 'mermaid';
+    container.setAttribute('data-original-code', rawCode);
+    pre.parentNode.replaceChild(container, pre);
+    try {
+        const id = `mermaid-svg-${i}`;
+        const { svg } = await mermaid.render(id, rawCode);
+        container.innerHTML = svg;
+
+        const svgElement = container.querySelector('svg');
+        svgElement.removeAttribute('width');
+        svgElement.removeAttribute('height');
+        svgElement.style.width = '100%';
+        svgElement.style.maxWidth = '100%';
+    } catch (error) {
+        console.error("Mermaid render failed:", error);
+        container.innerHTML = '<p style="color:red">Diagram error</p>';
+    }
+  });
+</script>
+
 {% endblock content %}

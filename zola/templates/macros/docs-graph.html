@@ -1,3 +1,12 @@
 {% macro docs_graph(page, current_section) %}
-<div class="docs-graph" id="graph"></div>
+<div class="docs-graph">
+    <div id="graph-loader">
+        <div class="spinner-border text-info" role="status">
+        </div>
+    </div>
+    <div id="graph"></div>
+</div>
+<!-- <div class="docs-graph" id="graph">
+    </div>
+</div> -->
 {% endmacro %}

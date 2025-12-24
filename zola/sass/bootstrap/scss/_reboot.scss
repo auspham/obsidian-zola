@@ -295,14 +295,13 @@ pre {
   code {
     @include font-size(inherit);
     color: inherit;
-    word-break: normal;
   }
 }
 
 code {
   @include font-size($code-font-size);
   color: $code-color;
-  word-wrap: break-word;
+  overflow-x: auto;
 
   // Streamline the style when inside anchors to avoid broken underline and more
   a > & {

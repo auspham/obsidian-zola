@@ -18,6 +18,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 {{ macros_head::resource() }}
 {{ macros_head::stylesheet() }}
+<script src="{{ get_url(path="js/lz-string.min.js") | safe }}" defer></script>
+<script src="{{ get_url(path="js/svg-pan-zoom.min.js") | safe }}" defer></script>
+<script src="{{ get_url(path="js/mermaid.min.js") | safe }}" defer></script>
 
 {% block seo %}
   {% if config.extra.title_separator %}

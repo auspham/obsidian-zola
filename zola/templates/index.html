@@ -42,7 +42,14 @@
   </div>
 
 {% if config.extra.home_graph %}
-  <div id="graph"></div>
+<div class="graph">
+  <div id="graph-loader">
+      <div class="spinner-border text-info" role="status">
+      </div>
+  </div>
+  <div id="graph" class="graph">
+  </div>
+</div>
 
 {% endif %}
 

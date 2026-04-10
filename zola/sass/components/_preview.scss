@@ -45,6 +45,19 @@
         font-size: 0.9em;
     }
 
+    pre {
+        background: #1e1e1e;
+        border-radius: 6px;
+        padding: 12px;
+        overflow-x: auto;
+
+        code {
+            background: transparent;
+            color: #dadada;
+            padding: 0;
+        }
+    }
+
     img {
         max-width: 100%;
         height: auto;
@@ -64,5 +77,13 @@ body.dark .preview {
 
     code {
         background: #333;
+    }
+
+    pre {
+        background: #1a1a1a;
+
+        code {
+            background: transparent;
+        }
     }
 }

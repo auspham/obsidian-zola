@@ -466,6 +466,83 @@ pre.language-mermaid {
 	max-height: 1000px;
 }
 
+// Mermaid zoom wrapper
+.mermaid-zoom-wrapper {
+    position: relative;
+    border: 1px solid #e3e3e3;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1em 0;
+    background-color: #fafafa;
+    background-image: radial-gradient(circle, #d0d0d0 1px, transparent 1px);
+    background-size: 20px 20px;
+    cursor: grab;
+}
+
+.dark .mermaid-zoom-wrapper {
+    border-color: #363636;
+    background-color: #1e1e1e;
+    background-image: radial-gradient(circle, #333 1px, transparent 1px);
+}
+
+.mermaid-zoom-viewport {
+    transform-origin: center center;
+    transition: transform 0.15s ease;
+    overflow: visible;
+
+    &.is-panning {
+        transition: none;
+    }
+}
+
+.mermaid-zoom-toolbar {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 10;
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.mermaid-zoom-wrapper:hover .mermaid-zoom-toolbar {
+    opacity: 1;
+}
+
+.mermaid-zoom-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    background: #fff;
+    color: #555;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+    &:hover {
+        background: #f0f0f0;
+        color: #222;
+        border-color: #bbb;
+    }
+}
+
+.dark .mermaid-zoom-btn {
+    background: #2a2a2a;
+    border-color: #444;
+    color: #aaa;
+
+    &:hover {
+        background: #363636;
+        color: #dadada;
+        border-color: #555;
+    }
+}
+
 pre {
 	word-wrap: break-word;
 	word-break: break-all;

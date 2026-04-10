@@ -49,7 +49,7 @@ function createZoomWrapper(container) {
   const zoomReset = document.createElement('button');
   zoomReset.className = 'mermaid-zoom-btn mermaid-zoom-reset';
   zoomReset.setAttribute('aria-label', 'Reset zoom');
-  zoomReset.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M6.5 1A5.5 5.5 0 0 0 1 6.5 5.5 5.5 0 0 0 6.5 12a5.48 5.48 0 0 0 3.27-1.08l3.15 3.16a.75.75 0 1 0 1.06-1.06l-3.16-3.15A5.48 5.48 0 0 0 12 6.5 5.5 5.5 0 0 0 6.5 1zM2.5 6.5a4 4 0 1 1 8 0 4 4 0 0 1-8 0z"/></svg>';
+  zoomReset.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/></svg>';
 
   toolbar.appendChild(zoomIn);
   toolbar.appendChild(zoomOut);
@@ -107,37 +107,33 @@ function createZoomWrapper(container) {
   }, { passive: false });
 
   // Pan via mouse drag
-  let isPanning = false;
-  let startX, startY;
-
   wrapper.addEventListener('mousedown', (e) => {
     if (e.target.closest('.mermaid-zoom-btn')) return;
-    isPanning = true;
-    startX = e.clientX;
-    startY = e.clientY;
+    let startX = e.clientX;
+    let startY = e.clientY;
     wrapper.style.cursor = 'grabbing';
     viewport.classList.add('is-panning');
     e.preventDefault();
-  });
 
-  document.addEventListener('mousemove', (e) => {
-    if (!isPanning) return;
-    const scale = parseFloat(viewport.dataset.scale);
-    const dx = (e.clientX - startX) / scale;
-    const dy = (e.clientY - startY) / scale;
-    viewport.dataset.translateX = parseFloat(viewport.dataset.translateX) + dx;
-    viewport.dataset.translateY = parseFloat(viewport.dataset.translateY) + dy;
-    startX = e.clientX;
-    startY = e.clientY;
-    applyTransform();
-  });
+    const panController = new AbortController();
+    const { signal } = panController;
 
-  document.addEventListener('mouseup', () => {
-    if (isPanning) {
-      isPanning = false;
+    document.addEventListener('mousemove', (e) => {
+      const scale = parseFloat(viewport.dataset.scale);
+      const dx = (e.clientX - startX) / scale;
+      const dy = (e.clientY - startY) / scale;
+      viewport.dataset.translateX = parseFloat(viewport.dataset.translateX) + dx;
+      viewport.dataset.translateY = parseFloat(viewport.dataset.translateY) + dy;
+      startX = e.clientX;
+      startY = e.clientY;
+      applyTransform();
+    }, { signal });
+
+    document.addEventListener('mouseup', () => {
       wrapper.style.cursor = '';
       viewport.classList.remove('is-panning');
-    }
+      panController.abort();
+    }, { signal, once: true });
   });
 
   return { wrapper, viewport };

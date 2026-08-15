@@ -2,6 +2,11 @@
 
 shopt -s extglob
 
+if [[ ! -d __site/zola || ! -f __site/convert.py ]]; then
+	echo "run.sh is only for the deployment workspace. Use ./local-run.sh from this repository."
+	exit 1
+fi
+
 mkdir __obsidian
 mv !(__obsidian|__site) __obsidian 
 

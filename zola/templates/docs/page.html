@@ -62,7 +62,7 @@
 {% if page.extra.is_excalidraw == "True" %}
 <script src="{{ get_url(path="js/excalidraw-canvas.js") | safe }}"></script>
 <script type="module">
-  import {exportToSvg} from "https://cdn.jsdelivr.net/npm/@excalidraw/excalidraw@0.18.0/+esm";
+  import {exportToSvg} from "https://cdn.jsdelivr.net/npm/@excalidraw/excalidraw@0.18.1/+esm";
 
   const compressedData = "{{ page.extra.excalidraw_data | safe }}".split("||||")
 
@@ -79,6 +79,7 @@
 
   // Track active canvas instances for cleanup on re-render
   const canvasInstances = [];
+  let renderVersion = 0;
 
   function getAppState(data, isDark) {
     return isDark
@@ -98,7 +99,73 @@
         };
   }
 
+  function namespaceSvgIds(svg, prefix) {
+    const idMap = new Map();
+    svg.querySelectorAll("[id]").forEach(element => {
+      const oldId = element.id;
+      const newId = `${prefix}-${oldId}`;
+      idMap.set(oldId, newId);
+      element.id = newId;
+    });
+
+    svg.querySelectorAll("*").forEach(element => {
+      Array.from(element.attributes).forEach(attribute => {
+        let value = attribute.value.replace(/url\(#([^)]+)\)/g, (match, id) => {
+          return idMap.has(id) ? `url(#${idMap.get(id)})` : match;
+        });
+        if (value.startsWith("#") && idMap.has(value.slice(1))) {
+          value = `#${idMap.get(value.slice(1))}`;
+        }
+        if (value !== attribute.value) {
+          element.setAttribute(attribute.name, value);
+        }
+      });
+    });
+  }
+
+  function fixArrowLabelMasks(svg) {
+    svg.querySelectorAll("mask").forEach(mask => {
+      const visibleRect = mask.querySelector('rect[fill="#fff"]');
+      const labelRect = mask.querySelector('rect[fill="#000"]');
+      if (!visibleRect || !labelRect) return;
+
+      const visibleWidth = Number(visibleRect.getAttribute("width"));
+      const visibleHeight = Number(visibleRect.getAttribute("height"));
+      const labelX = Number(labelRect.getAttribute("x"));
+      const labelY = Number(labelRect.getAttribute("y"));
+      const labelWidth = Number(labelRect.getAttribute("width"));
+      const labelHeight = Number(labelRect.getAttribute("height"));
+      const clipId = `clip-${mask.id}`;
+      const svgNamespace = "http://www.w3.org/2000/svg";
+
+      const clipPath = document.createElementNS(svgNamespace, "clipPath");
+      clipPath.id = clipId;
+      clipPath.setAttribute("clipPathUnits", "userSpaceOnUse");
+
+      const path = document.createElementNS(svgNamespace, "path");
+      path.setAttribute(
+        "d",
+        `M 0 0 H ${visibleWidth} V ${visibleHeight} H 0 Z ` +
+          `M ${labelX} ${labelY} H ${labelX + labelWidth} ` +
+          `V ${labelY + labelHeight} H ${labelX} Z`
+      );
+      path.setAttribute("clip-rule", "evenodd");
+      path.setAttribute("fill-rule", "evenodd");
+      clipPath.appendChild(path);
+
+      const maskReference = `url(#${mask.id})`;
+      svg.querySelectorAll("g[mask]").forEach(group => {
+        if (group.getAttribute("mask") !== maskReference) return;
+        group.removeAttribute("mask");
+        group.setAttribute("clip-path", `url(#${clipId})`);
+      });
+      mask.replaceWith(clipPath);
+    });
+  }
+
   async function renderAll() {
+    const currentRenderVersion = ++renderVersion;
+
     // Save current view state before destroying
     const savedStates = canvasInstances.map(c => c.getState());
 
@@ -106,10 +173,10 @@
     canvasInstances.forEach(c => c.destroy());
     canvasInstances.length = 0;
 
-    const elements = document.querySelectorAll(".excalidraw-preview");
+    const elements = Array.from(document.querySelectorAll(".excalidraw-preview"));
     const isDark = document.body.classList.contains("dark");
 
-    elements.forEach(async (element, i) => {
+    await Promise.all(elements.map(async (element, i) => {
       if (!parsedData[i]) return;
       try {
         // Clear previous content (keep loading spinner markup)
@@ -122,6 +189,10 @@
           files: parsedData[i].files || {},
           getDimensions: (width, height) => ({ width: width + 50, height: height + 50 })
         });
+        namespaceSvgIds(svg, `excalidraw-${currentRenderVersion}-${i}`);
+        fixArrowLabelMasks(svg);
+
+        if (currentRenderVersion !== renderVersion) return;
 
         const loading = element.querySelector('#loading');
         if (loading) loading.style.display = 'none';
@@ -130,14 +201,16 @@
         if (savedStates[i]) {
           canvas.restoreState(savedStates[i]);
         }
-        canvasInstances.push(canvas);
+        canvasInstances[i] = canvas;
 
       } catch (err) {
+        if (currentRenderVersion !== renderVersion) return;
+
         const loading = element.querySelector('#loading');
         if (loading) loading.innerHTML = `<span style="color:red">Error: ${err.message}</span>`;
         console.error(err);
       }
-    });
+    }));
   }
 
   // Initial render

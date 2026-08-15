@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Check for python-is-python3 installed
 if ! command -v python &>/dev/null; then
 	echo "It appears you do not have python-is-python3 installed"
@@ -43,7 +45,10 @@ if [[ -z "${VAULT}" ]]; then
 fi
 
 # Pull environment variables from the vault's netlify.toml when building (by generating env.sh to be sourced)
+rm -f env.sh
 python env.py
+source env.sh
+rm env.sh
 
 # Set the site and repo url as local since locally built
 export SITE_URL=local
@@ -65,7 +70,7 @@ else
 fi
 
 # Run conversion script
-source env.sh && python convert.py && rm env.sh
+python convert.py
 
 # Serve Zola site
 zola --root=build serve

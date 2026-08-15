@@ -9,7 +9,7 @@ document.getElementById("mode").addEventListener("click", () => {
     localStorage.setItem("theme", isDark() ? "dark" : "light");
 
     // Update graph colors if exists
-    if (graph) {
+    if (typeof graph !== "undefined" && typeof graph.setOptions === "function") {
         graph.setOptions({
             nodes: {
                 color: isDark() ? "#555" : "#d4d4d4",

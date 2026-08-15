@@ -5,7 +5,6 @@ import re
 import shutil
 from dataclasses import dataclass
 from datetime import datetime
-from distutils.util import strtobool
 from fnmatch import fnmatch
 from os import environ
 from pathlib import Path
@@ -302,7 +301,15 @@ class Settings:
     def is_true(cls, key: str) -> bool:
         """Returns whether an option's string value is true."""
         val = cls.options[key]
-        return bool(strtobool(val)) if val else False
+        if not val:
+            return False
+
+        normalized = val.lower()
+        if normalized in {"y", "yes", "t", "true", "on", "1"}:
+            return True
+        if normalized in {"n", "no", "f", "false", "off", "0"}:
+            return False
+        raise ValueError(f"invalid truth value {val!r}")
 
     @classmethod
     def _matches_patterns(cls, rel_path: Path, key: str) -> bool:

@@ -27,33 +27,16 @@ document.getElementById("mode").addEventListener("click", () => {
 
 function updateCallOut(scope) {
     scope.querySelectorAll('blockquote').forEach(bq => {
-        const firstParagraph = bq.firstElementChild;
-        const marker = firstParagraph?.firstChild;
-        if (firstParagraph?.tagName !== 'P' || marker?.nodeType !== Node.TEXT_NODE) {
-            return;
-        }
+    const content = bq.innerHTML.trim();
+    
+    const match = content.match(/^(?:<p>)?\[!(\w+)\]/i);
 
-        const match = marker.textContent.match(/^\s*\[!([\w-]+)\][+-]?\s*(.*)$/i);
-        if (!match) {
-            return;
-        }
-
+    if (match) {
         const type = match[1].toLowerCase();
-        const title = match[2].trim() || type.charAt(0).toUpperCase() + type.slice(1);
-        const titleElement = document.createElement('div');
-        titleElement.className = 'callout-title';
-        titleElement.textContent = title;
-
-        marker.remove();
-        if (firstParagraph.firstElementChild?.tagName === 'BR') {
-            firstParagraph.firstElementChild.remove();
-        }
-        if (!firstParagraph.textContent.trim() && !firstParagraph.children.length) {
-            firstParagraph.remove();
-        }
-
         bq.classList.add('callout', `callout-${type}`);
-        bq.prepend(titleElement);
+        bq.innerHTML = content.replace(/^(?:<p>)?\[!(\w+)\](?:<br>)?/, 
+        `<div class="callout-title">${type}</div><p>`);
+    }
     });
 }
 
